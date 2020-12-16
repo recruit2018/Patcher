@@ -1,0 +1,9 @@
+{
+	"commandshell": [
+		{"command": "md5sum ./1.txt | awk '{ print $1 }'"},
+		{"command": "cd /home/ivan/Remotemachine/ && rm -R soft/* && mv newpatch.tar.gz ./soft && cd soft/ && tar xvzf newpatch.tar.gz"},
+		{"command": "find /home/ivan/Remotemachine/backup -type f | wc -l "},
+		{"command": "cd /home/ivan/Remotemachine/backup && var=$(ls -t | tail -n 1) && rm -R $var"}
+	]
+
+}
