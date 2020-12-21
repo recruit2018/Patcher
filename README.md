@@ -10,10 +10,8 @@ $ git submodule update
 
 To install openssl, follow these steps:
 ```sh
-$ cd openssl directory
-$ sudo ./config -fPIC shared --prefix=/usr --openssldir=/etc/ssl
-$ sudo make
-$ sudo make install
+$ sudo apt-get install openssl
+$ sudo apt-get install libssl-dev
 ```
 
 To install libssh2, follow these steps:
