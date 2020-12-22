@@ -10,7 +10,6 @@ $ git submodule update
 
 To install openssl, follow these steps:
 ```sh
-$ sudo apt-get install openssl
 $ sudo apt-get install libssl-dev
 ```
 

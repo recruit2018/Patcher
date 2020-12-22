@@ -13,7 +13,7 @@
 #include "sshsftpcommandsend.h"
 #include "patcherfunc.h"
 #include "jsoncontroller.h"
-
+#include "mainwindow.h"
 
 
 using namespace Patcher;
@@ -28,7 +28,8 @@ int main (int argc, char** argv)
 {
    QApplication a(argc, argv);
 
-
+    MainWindow win;
+    win.show();
     shellcommand = jspursing("./commandshell.json");
 
 
@@ -43,7 +44,7 @@ int main (int argc, char** argv)
 
 
    SshClient* client = new SshClient("FIRST CLIENT");
-   client->setPassphrase(cmdargs[3]);
+   client->setPassphrase(cmdargs.at(3));
 
    QByteArrayList MyByteList;
    MyByteList.append("password");
@@ -54,7 +55,7 @@ int main (int argc, char** argv)
     QEventLoop waitssh;
     QObject::connect(client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
     QObject::connect(client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
-    client->connectToHost(cmdargs[1],cmdargs[2],myport,MyByteList);
+    client->connectToHost(cmdargs.at(1),cmdargs.at(2),myport,MyByteList);
     waitssh.exec();
 
     if(client->sshState() != SshClient::SshState::Ready)
