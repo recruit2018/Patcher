@@ -16,33 +16,36 @@ aux_source_directory(./srs SRC_LIST)
 set(HEADERS_DIR ./include)
 set(HEADERS ${HEADERS_DIR}/sshclient.h ${HEADERS_DIR}/sshchannel.h ${HEADERS_DIR}/sshkey.h ${HEADERS_DIR}/sshprocess.h
     ${HEADERS_DIR}/sshsftp.h ${HEADERS_DIR}/sshsftpcommandsend.h ${HEADERS_DIR}/sshsftpcommand.h
-    ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/jsoncontroller.h)
+    ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/jsoncontroller.h ${HEADERS_DIR}/commandtable.h ${HEADERS_DIR}/mainwindow.h)
 
 
 find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)
-    message("OpenSSL${OPENSSL_VERSION} was found ")
+    message("OpenSSL ${OPENSSL_VERSION} was found ")
 endif()
 find_package(Libssh2 REQUIRED CONFIG)
+if(LIBSSH2_FOUND)
+    message("Libssh2 was found ")
+endif()
 #find_package(Libssh2 REQUIRED CONFIG)
 #if(LIBSSH2_FOUND)
 #    message("Libssh2 was found ")
 #endif()
 
-set(TS_FILES patcher_ru_RU.ts)
+set(TS_FILES ./patcher_ru_RU.ts)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 set(QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Widgets)
 if(Qt5_FOUND)
-    message("Qt${Qt5_VERSION} was found ")
+    message("Qt ${Qt5_VERSION} was found ")
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADERS})
+    qt_add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADERS} ${TS_FILES})
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
-    add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADERS})
+    add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADERS} ${TS_FILES})
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
