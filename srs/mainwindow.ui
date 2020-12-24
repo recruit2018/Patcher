@@ -18,18 +18,13 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="CommandTable" name="tableWidget">
+       <widget class="CommandTable" name="commandtableWidget">
         <property name="maximumSize">
          <size>
           <width>779</width>
           <height>568</height>
          </size>
         </property>
-        <row>
-         <property name="text">
-          <string>Id</string>
-         </property>
-        </row>
         <column>
          <property name="text">
           <string>Ip Address</string>
@@ -63,9 +58,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_2">
+        <property name="text">
+         <string>Add device</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="pushButton">
         <property name="text">
-         <string>Start Patching</string>
+         <string>Start patching</string>
         </property>
        </widget>
       </item>

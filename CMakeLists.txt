@@ -33,7 +33,7 @@ endif()
 #endif()
 
 set(TS_FILES ./patcher_ru_RU.ts)
-
+set(UI_FILE ./srs/mainwindow.ui)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 set(QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Widgets)
@@ -42,10 +42,10 @@ if(Qt5_FOUND)
 endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADERS} ${TS_FILES})
+    qt_add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADERS} ${TS_FILES} ${UI_FILE})
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
-    add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADERS} ${TS_FILES})
+    add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADERS} ${TS_FILES} ${UI_FILE})
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 

@@ -91,6 +91,7 @@ LIBSSH2_SESSION *SshClient::session()
 
 int SshClient::connectToHost(const QString & user, const QString & host, quint16 port, QByteArrayList methodes)
 {
+
     if(sshState() != SshState::Unconnected && sshState() != SshState::Error)
     {
         qCCritical(sshclient) << m_name << "Allready connected";
