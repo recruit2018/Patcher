@@ -11,13 +11,17 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-aux_source_directory(./srs SRC_LIST)
+
 
 set(HEADERS_DIR ./include)
+set(TS_FILES ./patcher_ru_RU.ts)
+set(UI_FILE ./srs/mainwindow.ui)
+
 set(HEADERS ${HEADERS_DIR}/sshclient.h ${HEADERS_DIR}/sshchannel.h ${HEADERS_DIR}/sshkey.h ${HEADERS_DIR}/sshprocess.h
     ${HEADERS_DIR}/sshsftp.h ${HEADERS_DIR}/sshsftpcommandsend.h ${HEADERS_DIR}/sshsftpcommand.h
     ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/jsoncontroller.h ${HEADERS_DIR}/commandtable.h ${HEADERS_DIR}/mainwindow.h)
 
+aux_source_directory(./srs SRC_LIST)
 
 find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)
@@ -32,8 +36,7 @@ endif()
 #    message("Libssh2 was found ")
 #endif()
 
-set(TS_FILES ./patcher_ru_RU.ts)
-set(UI_FILE ./srs/mainwindow.ui)
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Network Widgets LinguistTools REQUIRED)
 set(QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Widgets)

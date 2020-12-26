@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QTranslator>
+#include <QFileDialog>
 #include "sshclient.h"
 #include "sshprocess.h"
 #include "sshsftp.h"
@@ -27,6 +28,10 @@ private:
     QString m_pass;
     QByteArrayList MyByteList;
     QTranslator m_tranclator;
+    QString m_localfilepath;
+    QString m_destfilepath;
+    int getconnectioninfo();
+
 protected:
     void changeEvent(QEvent* event) override;
 public:
@@ -34,15 +39,19 @@ public:
    virtual ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
-
-    void on_pushButton_2_clicked();
-
     void on_actionRussian_triggered();
 
     void on_actionEnglish_triggered();
 
+    void on_But_add_device_clicked();
+
+    void on_But_start_pach_clicked();
+
+    void on_but_load_command_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
+
+
 #endif // MAINWINDOW_H

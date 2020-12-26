@@ -6,7 +6,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    m_shellcommand = Patcher::jspursing("./commandshell.json");
     MyByteList.append("password");
 
 }
@@ -17,22 +16,15 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_But_start_pach_clicked()
 {
 
-    m_user = ui->commandtableWidget->item(0,2)->text();
-    m_host = ui->commandtableWidget->item(0,0)->text();
-    m_pass = ui->commandtableWidget->item(0,3)->text();
-
-
-qDebug() << "Can't connect to connexion server";
+    getconnectioninfo();
 
     m_client.setPassphrase(m_pass);
-qDebug() << "Can't connect to connexion server";
     QEventLoop waitssh;
     QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
     QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
-
     m_client.connectToHost(m_user,m_host,22,MyByteList);
     waitssh.exec();
 
@@ -92,7 +84,7 @@ qDebug() << "Can't connect to connexion server";
              procccc->runCommand("ls");
 
 
-             //    client->~SshClient();
+             m_client.disconnectFromHost();
              //    sleep(10);
              //     client = new SshClient("FIRST CLIENT2");
              //    client->setPassphrase(cmdargs[3]);
@@ -114,7 +106,7 @@ qDebug() << "Can't connect to connexion server";
              //    //proccccc->runCommand("shutdown now");
 }
 
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_But_add_device_clicked()
 {
 
     ui->commandtableWidget->insertRow(ui->commandtableWidget->rowCount());
@@ -141,4 +133,28 @@ else
 void MainWindow::on_actionEnglish_triggered()
 {
     qApp->removeTranslator(&m_tranclator);
+}
+
+
+int MainWindow::getconnectioninfo()
+{
+    m_user = ui->commandtableWidget->item(0,2)->text();
+    m_host = ui->commandtableWidget->item(0,0)->text();
+    m_pass = ui->commandtableWidget->item(0,3)->text();
+      return 0;
+}
+
+
+
+
+
+
+
+
+
+
+void MainWindow::on_but_load_command_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Select command file"));
+    m_shellcommand = Patcher::jspursing(fileName);
 }

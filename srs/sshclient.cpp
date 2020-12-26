@@ -582,7 +582,6 @@ void SshClient::_ssh_processEvent()
 
         case SshState::Error:
         {
-        qCWarning(sshclient) << m_name << ": ssh socket connection e!!!!!rror";
             m_keepalive.stop();
             if(m_socket.state() != QAbstractSocket::UnconnectedState)
             {
