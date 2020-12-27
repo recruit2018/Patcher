@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.1 )
 project(Patcher VERSION 0.1 LANGUAGES CXX )
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
@@ -19,7 +19,8 @@ set(UI_FILE ./srs/mainwindow.ui)
 
 set(HEADERS ${HEADERS_DIR}/sshclient.h ${HEADERS_DIR}/sshchannel.h ${HEADERS_DIR}/sshkey.h ${HEADERS_DIR}/sshprocess.h
     ${HEADERS_DIR}/sshsftp.h ${HEADERS_DIR}/sshsftpcommandsend.h ${HEADERS_DIR}/sshsftpcommand.h
-    ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/jsoncontroller.h ${HEADERS_DIR}/commandtable.h ${HEADERS_DIR}/mainwindow.h)
+    ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/jsoncontroller.h ${HEADERS_DIR}/commandtable.h ${HEADERS_DIR}/mainwindow.h
+    ${HEADERS_DIR}/device.h)
 
 aux_source_directory(./srs SRC_LIST)
 

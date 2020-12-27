@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <QTranslator>
 #include <QFileDialog>
+#include <QSettings>
+#include <QList>
+#include "device.h"
 #include "sshclient.h"
 #include "sshprocess.h"
 #include "sshsftp.h"
@@ -24,14 +27,21 @@ private:
     SshSFtp *m_sftp;
     QStringList m_shellcommand;
     QString m_user;
+    QString m_device;
     QString m_host;
     QString m_pass;
     QByteArrayList MyByteList;
+    QSettings* m_settings;
     QTranslator m_tranclator;
     QString m_localfilepath;
     QString m_destfilepath;
+    QList<Device*> m_devices;
     int getconnectioninfo();
 
+    bool save_device_settings();
+    bool loadsettings();
+    void tempInitRow();
+    inline void addDevice() { m_devices.append(new Device(this)); }
 protected:
     void changeEvent(QEvent* event) override;
 public:
@@ -47,7 +57,11 @@ private slots:
 
     void on_But_start_pach_clicked();
 
-    void on_but_load_command_clicked();
+    void save_setting_device();
+
+    void on_actionLoad_settings_triggered();
+
+    void on_actionSave_sattings_triggered();
 
 private:
     Ui::MainWindow *ui;

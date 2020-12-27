@@ -47,7 +47,12 @@ QStringList jspursing(const QString& filepath)
     foreach (QJsonValue var, jarr) {
         command.append(var.toObject()["command"].toString());
     }
-        return command;
+    return command;
+}
+
+void printlist(const QStringList & list)
+{
+    for(auto i: list) qDebug()<<i;
 }
 
 
