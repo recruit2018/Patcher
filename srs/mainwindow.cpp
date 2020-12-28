@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     MyByteList.append("password");
     m_settings = new QSettings(QDir::currentPath()+"/settings.ini", QSettings::IniFormat, this);
+
 }
 
 MainWindow::~MainWindow()
@@ -114,8 +115,9 @@ void MainWindow::save_setting_device()
 
 void MainWindow::on_But_add_device_clicked()
 {
-    Device* dev = new Device(this);
+    Device* dev = new Device(this);    
     createRow(dev);
+    ui->but_del_device->setEnabled(true);
 }
 
 void MainWindow::on_actionRussian_triggered()
@@ -252,9 +254,9 @@ void MainWindow::createRow(Device* dev)
     ui->commandtableWidget->setItem(pos,2,new QTableWidgetItem(dev->get_device_name()));
     ui->commandtableWidget->setItem(pos,4,new QTableWidgetItem(QString::number(dev->get_port())));
     auto item = new QTableWidgetItem(tr("online?"));
-    item->setTextColor(Qt::green);
+    item->setForeground(Qt::green);
     ui->commandtableWidget->setItem(pos,5, item);
-    ui->commandtableWidget->setItem(pos,6,new QTableWidgetItem(tr("file transfer")));
+    ui->commandtableWidget->setItem(pos,6,new QTableWidgetItem(tr("file transfer ->")));
 
     QPushButton * but_save_set = new QPushButton("Save settings",this);
     QPushButton * but_create_set = new QPushButton("Create settings",this);
@@ -278,13 +280,17 @@ void MainWindow::on_actionLoad_settings_triggered()
                                    tr("When downloading, all unsaved data will be lost.\n"
                                       "Do you really want to continue?"),
                                    QMessageBox::Ok | QMessageBox::Cancel);
-    if (ret == QMessageBox::Ok)
+    if(ret == QMessageBox::Ok)
     {
         ui->commandtableWidget->setRowCount(0);
         loadSettings();
     }
     else
         return;
+
+    if(ui->commandtableWidget->rowCount() > 0)
+           ui->but_del_device->setEnabled(true);
+
 }
 
 void MainWindow::on_actionSave_sattings_triggered()
@@ -293,7 +299,7 @@ void MainWindow::on_actionSave_sattings_triggered()
                                    tr("When saving, the previous settings will be permanently changed.\n"
                                       "Do you really want to continue?"),
                                    QMessageBox::Ok | QMessageBox::Cancel);
-    if (ret == QMessageBox::Ok)
+    if(ret == QMessageBox::Ok)
     {
         saveSettings();
     }
@@ -307,7 +313,11 @@ void MainWindow::on_but_del_device_clicked()
     ui->commandtableWidget->removeRow(pos);
     m_device_list.removeAt(pos);
 
-    qDebug()<<"remove :"<<pos;
+    if(ui->commandtableWidget->rowCount() == 0)
+        ui->but_del_device->setEnabled(false);
+
+    qDebug()<<"Remove: "<<pos<<"\n"<<"Count of element: "<<m_device_list.count();
+
     for(auto i : m_device_list)
     {
         i->printself();
