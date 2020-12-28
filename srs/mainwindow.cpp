@@ -162,10 +162,43 @@ bool MainWindow::save_device_settings()
 
     }
         m_settings->endGroup();
-    m_settings->endGroup();
+        m_settings->endGroup();
 }
 
-bool MainWindow::loadsettings()
+void MainWindow::saveSettings()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Select command file"));
+    m_shellcommand = Patcher::jspursing(fileName);
+
+    m_settings->beginGroup("Devices");
+
+    for(int i =0;i<ui->commandtableWidget->rowCount();i++)
+    {
+        m_settings->beginGroup(ui->commandtableWidget->item(i,2)->text());
+        m_settings->setValue("Address",ui->commandtableWidget->item(i,0)->text());
+        m_settings->setValue("User",ui->commandtableWidget->item(i,1)->text());
+        m_settings->setValue("Device",ui->commandtableWidget->item(i,2)->text());
+        m_settings->setValue("Port",ui->commandtableWidget->item(i,4)->text());
+        m_settings->beginGroup("COMMAND");
+        for(int j=0; j<m_shellcommand.size();j++)
+        {
+            if(m_shellcommand.at(j) == "sftp")
+            {
+                m_settings->beginGroup("SFTP");
+                m_settings->setValue("LOCALPATH","./newpatch.tar.gz");
+                m_settings->setValue("REMOTEPATH","/home/ivan/Remotemachine/newpatch.tar.gz");
+                m_settings->endGroup();
+            }
+            m_settings->setValue(QString("command%1").arg(j),m_shellcommand.at(j));
+
+        }
+            m_settings->endGroup();
+        m_settings->endGroup();
+    }
+ m_settings->endGroup();
+}
+
+bool MainWindow::loadSettings()
 {
     Device* device;
     m_settings->beginGroup("Devices");
@@ -197,10 +230,8 @@ bool MainWindow::loadsettings()
         }
               m_settings->endGroup();
         m_settings->endGroup();
-
-    //    device->printself();
         createRow(device);
-        m_device_list.append(device);
+      //  m_device_list.append(device);
     }
 //    for(auto i : m_device_list)
 //    {
@@ -229,56 +260,40 @@ void MainWindow::createRow(Device* dev)
     ui->commandtableWidget->setCellWidget(ui->commandtableWidget->rowCount()-1, 8, but_save_set);
     ui->commandtableWidget->setCellWidget(ui->commandtableWidget->rowCount()-1, 7, but_create_set);
 
+    m_device_list.append(dev);
+
 }
-
-
-
-
-
-
 
 
 
 
 void MainWindow::on_actionLoad_settings_triggered()
 {
-    ui->commandtableWidget->setRowCount(0);
-    loadsettings();
+    int ret = QMessageBox::warning(this, tr("Patcher"),
+                                   tr("When downloading, all unsaved data will be lost.\n"
+                                      "Do you really want to continue?"),
+                                   QMessageBox::Ok | QMessageBox::Cancel);
+    if (ret == QMessageBox::Ok)
+    {
+        ui->commandtableWidget->setRowCount(0);
+        loadSettings();
+    }
+    else
+        return;
 }
 
 void MainWindow::on_actionSave_sattings_triggered()
 {
-
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Select command file"));
-    m_shellcommand = Patcher::jspursing(fileName);
-
-    m_settings->beginGroup("Devices");
-
-    for(int i =0;i<ui->commandtableWidget->rowCount();i++)
+    int ret = QMessageBox::warning(this, tr("Patcher"),
+                                   tr("When saving, the previous settings will be permanently changed.\n"
+                                      "Do you really want to continue?"),
+                                   QMessageBox::Ok | QMessageBox::Cancel);
+    if (ret == QMessageBox::Ok)
     {
-        m_settings->beginGroup(ui->commandtableWidget->item(i,2)->text());
-        m_settings->setValue("Address",ui->commandtableWidget->item(i,0)->text());
-        m_settings->setValue("User",ui->commandtableWidget->item(i,1)->text());
-        m_settings->setValue("Device",ui->commandtableWidget->item(i,2)->text());
-        m_settings->setValue("Port",ui->commandtableWidget->item(i,4)->text());
-        m_settings->beginGroup("COMMAND");
-        for(int j=0; j<m_shellcommand.size();j++)
-        {
-            if(m_shellcommand.at(j) == "sftp")
-            {
-                m_settings->beginGroup("SFTP");
-                m_settings->setValue("LOCALPATH","./newpatch.tar.gz");
-                m_settings->setValue("REMOTEPATH","/home/ivan/Remotemachine/newpatch.tar.gz");
-                m_settings->endGroup();
-            }
-            m_settings->setValue(QString("command%1").arg(j),m_shellcommand.at(j));
-
-        }
-            m_settings->endGroup();
-        m_settings->endGroup();
+        saveSettings();
     }
- m_settings->endGroup();
-
+    else
+        return;
 }
 
 void MainWindow::on_but_del_device_clicked()
@@ -287,7 +302,7 @@ void MainWindow::on_but_del_device_clicked()
     ui->commandtableWidget->removeRow(pos);
     m_device_list.removeAt(pos);
 
-    qDebug()<<"remove :"<<ui->commandtableWidget->currentRow();
+    qDebug()<<"remove :"<<pos;
     for(auto i : m_device_list)
     {
         i->printself();

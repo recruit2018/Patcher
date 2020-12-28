@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QList>
+#include <QMessageBox>
 #include "device.h"
 #include "sshclient.h"
 #include "sshprocess.h"
@@ -38,7 +39,8 @@ private:
     QList<Device*> m_device_list;
 
     bool save_device_settings();
-    bool loadsettings();
+    bool loadSettings();
+    void saveSettings();
     void createRow(Device* dev = nullptr);
     inline void addDevice() { m_device_list.append(new Device(this)); }
 protected:
