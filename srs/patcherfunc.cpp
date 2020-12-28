@@ -50,9 +50,10 @@ QStringList jspursing(const QString& filepath)
     return command;
 }
 
-void printlist(const QStringList & list)
+void printlist(const QStringList& list)
 {
     for(auto i: list) qDebug()<<i;
+
 }
 
 

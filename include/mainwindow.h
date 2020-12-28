@@ -35,13 +35,12 @@ private:
     QTranslator m_tranclator;
     QString m_localfilepath;
     QString m_destfilepath;
-    QList<Device*> m_devices;
-    int getconnectioninfo();
+    QList<Device*> m_device_list;
 
     bool save_device_settings();
     bool loadsettings();
-    void tempInitRow();
-    inline void addDevice() { m_devices.append(new Device(this)); }
+    void createRow(Device* dev = nullptr);
+    inline void addDevice() { m_device_list.append(new Device(this)); }
 protected:
     void changeEvent(QEvent* event) override;
 public:
@@ -62,6 +61,8 @@ private slots:
     void on_actionLoad_settings_triggered();
 
     void on_actionSave_sattings_triggered();
+
+    void on_but_del_device_clicked();
 
 private:
     Ui::MainWindow *ui;
