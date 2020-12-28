@@ -245,11 +245,16 @@ void MainWindow::createRow(Device* dev)
 {
 
     ui->commandtableWidget->insertRow(ui->commandtableWidget->rowCount());
+    auto pos = (ui->commandtableWidget->rowCount() -1);
 
-    ui->commandtableWidget->setItem(ui->commandtableWidget->rowCount()-1,0,new QTableWidgetItem(dev->get_host()));
-    ui->commandtableWidget->setItem(ui->commandtableWidget->rowCount()-1,1,new QTableWidgetItem(dev->get_user()));
-    ui->commandtableWidget->setItem(ui->commandtableWidget->rowCount()-1,2,new QTableWidgetItem(dev->get_device_name()));
-    ui->commandtableWidget->setItem(ui->commandtableWidget->rowCount()-1,4,new QTableWidgetItem(QString::number(dev->get_port())));
+    ui->commandtableWidget->setItem(pos,0,new QTableWidgetItem(dev->get_host()));
+    ui->commandtableWidget->setItem(pos,1,new QTableWidgetItem(dev->get_user()));
+    ui->commandtableWidget->setItem(pos,2,new QTableWidgetItem(dev->get_device_name()));
+    ui->commandtableWidget->setItem(pos,4,new QTableWidgetItem(QString::number(dev->get_port())));
+    auto item = new QTableWidgetItem(tr("online?"));
+    item->setTextColor(Qt::green);
+    ui->commandtableWidget->setItem(pos,5, item);
+    ui->commandtableWidget->setItem(pos,6,new QTableWidgetItem(tr("file transfer")));
 
     QPushButton * but_save_set = new QPushButton("Save settings",this);
     QPushButton * but_create_set = new QPushButton("Create settings",this);
@@ -257,8 +262,8 @@ void MainWindow::createRow(Device* dev)
 
     connect(but_save_set,SIGNAL(clicked()),this, SLOT(save_setting_device()));
 
-    ui->commandtableWidget->setCellWidget(ui->commandtableWidget->rowCount()-1, 8, but_save_set);
-    ui->commandtableWidget->setCellWidget(ui->commandtableWidget->rowCount()-1, 7, but_create_set);
+    ui->commandtableWidget->setCellWidget(pos, 8, but_save_set);
+    ui->commandtableWidget->setCellWidget(pos, 7, but_create_set);
 
     m_device_list.append(dev);
 
