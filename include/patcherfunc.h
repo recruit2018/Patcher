@@ -13,12 +13,10 @@ namespace Patcher
 {
 
 void printlist(const QStringList & );
+
 QString getfilehash(const QString&);
 
 QStringList jspursing(const QString&);
-
-
-
 
 
 }

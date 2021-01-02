@@ -6,7 +6,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    MyByteList.append("password");
     m_settings = new QSettings(QDir::currentPath()+"/settings.ini", QSettings::IniFormat, this);
 
 }
@@ -20,90 +19,185 @@ MainWindow::~MainWindow()
 void MainWindow::on_But_start_pach_clicked()
 {
 
-    m_client.setPassphrase(m_pass);
-    QEventLoop waitssh;
-    QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
-    QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
-    m_client.connectToHost(m_user,m_host,22,MyByteList);
-    waitssh.exec();
+    ui->But_add_device->setEnabled(false);
+    ui->But_start_pach->setEnabled(false);
+    ui->but_del_device->setEnabled(false);
 
-    if(m_client.sshState() != SshClient::SshState::Ready)
-     {
-          qDebug() << "Can't connect to connexion server";
-     }else
-          qDebug()  << "SSH connected";
+    Device * dev;
+    QStringList command;
+    SshSFtp* sftp;
+    SshProcess* proc;
+    SshSftpCommandSend* cmd;
+    QByteArrayList MyByteList;
+    MyByteList.append("password");
 
+    QString source("./newpatch.tar.gz");
+    QString dest("/home/ivan/Remotemachine/newpatch.tar.gz");
 
-               SshProcess *proc = m_client.getChannel<SshProcess>("command");
+    QString localfilehash;
+    QString filehash;
+    QString filecount;
 
-               proc->runCommand(m_shellcommand.at(0));
+    for(int i= 0; i < m_device_list.count(); i++)
+    {
+        dev = m_device_list.at(i);
 
-               QString localfilehash = Patcher::getfilehash("./1.txt");
+        m_client.setPassphrase(ui->commandtableWidget->item(i,3)->text());
 
-               QString filehash = QString::fromStdString(proc->result().toStdString());
+        QEventLoop waitssh;
+        QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
+        QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
+        m_client.connectToHost(dev->get_user(),dev->get_host(),dev->get_port(),MyByteList);
+        waitssh.exec();
 
-               filehash.chop(1);
-
-                  const QString source("./newpatch.tar.gz");
-                  QString dest("/home/ivan/Remotemachine/newpatch.tar.gz");
-
-         if(filehash != localfilehash)
-          {
-               qDebug()<<filehash<<"   "<<localfilehash;
-               QEventLoop wait;
-
-               SshSFtp *mysftp = m_client.getChannel<SshSFtp>("mysftp!");
-               SshSftpCommandSend *cmd = new SshSftpCommandSend(source,dest,*mysftp);
-               QObject::connect(mysftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
-
-               mysftp->processCmd(cmd);
-               wait.exec();
-           }
-
-             SshProcess *procc = m_client.getChannel<SshProcess>("command2");
+        if(m_client.sshState() != SshClient::SshState::Ready)
+        {
+            qDebug() << "Can't connect to connexion server";
+        }else
+            qDebug()  << "SSH connected";
 
 
-             procc->runCommand(m_shellcommand.at(1));
+        command = dev->get_command_list();
+        for(int j= 0; j < command.count();j++)
+        {
+            proc = m_client.getChannel<SshProcess>(QString("command%1").arg(i));
+            if(j == 0)
+            {
+                proc->runCommand(command.at(j));
+                localfilehash = Patcher::getfilehash("./1.txt");
+                filehash = QString::fromStdString(proc->result().toStdString());
+                filehash.chop(1);
 
+                // source = dev->get_sftp_local_path();
+                //  dest = dev->get_sftp_remote_path();
 
-             SshProcess *proccc = m_client.getChannel<SshProcess>("command3");
+                if(filehash != localfilehash)
+                {
+                    qDebug()<<filehash<<"   "<<localfilehash;
+                    sftp = m_client.getChannel<SshSFtp>("ftp");
+                    cmd = new SshSftpCommandSend(source,dest,*sftp);
+                    QEventLoop wait;
+                    QObject::connect(sftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
+                    sftp->processCmd(cmd);
+                    wait.exec();
+                }
+                continue;
+            }
 
-             proccc->runCommand(m_shellcommand.at(2));
-             QString filecount = QString::fromStdString(proccc->result().toStdString());
+            if( j == 2 )
+            {
+                proc->runCommand(command.at(j));
+                filecount = QString::fromStdString(proc->result().toStdString());
+                ++j;
+                if(filecount.toInt() > 10)
+                {
+                    proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
+                    proc->runCommand(command.at(j));
 
-             if(filecount.toInt() > 10)
-             {
+                }
+                continue;
+            }
 
-             SshProcess *procccc = m_client.getChannel<SshProcess>("command4");
-             procccc->runCommand(m_shellcommand.at(3));
+            proc->runCommand(command.at(j));
 
-             }
+        }
 
-             SshProcess *procccc = m_client.getChannel<SshProcess>("command5");
-             procccc->runCommand("ls");
+        proc = m_client.getChannel<SshProcess>("fsfdfsdf");
+        proc->runCommand("ls");
+          m_client.disconnectFromHost();
+    }
 
+    ui->But_add_device->setEnabled(true);
+    ui->But_start_pach->setEnabled(true);
+    ui->but_del_device->setEnabled(true);
 
-             m_client.disconnectFromHost();
-             //    sleep(10);
-             //     client = new SshClient("FIRST CLIENT2");
-             //    client->setPassphrase(cmdargs[3]);
-
-             //    QEventLoop waitsshh;
-             //    QObject::connect(client, &SshClient::sshReady, &waitsshh, &QEventLoop::quit);
-             //    QObject::connect(client, &SshClient::sshError, &waitsshh, &QEventLoop::quit);
-             //    client->connectToHost(cmdargs[1],cmdargs[2],myport,MyByteList);
-             //    waitsshh.exec();
-
-             //    if(client->sshState() != SshClient::SshState::Ready)
-             //     {
-             //          qDebug() << "Can't connect to connexion server";
-
-             //     }else
-             //          qDebug()  << "SSH connected";
-
-             //    //SshProcess *proccccc = client->getChannel<SshProcess>("command5");
-             //    //proccccc->runCommand("shutdown now");
 }
+
+//    m_shellcommand = Patcher::jspursing("commandshell.json");
+//    m_client.setPassphrase(m_pass);
+//    QEventLoop waitssh;
+//    QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
+//    QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
+//    m_client.connectToHost(m_user,m_host,22,MyByteList);
+//    waitssh.exec();
+
+//    if(m_client.sshState() != SshClient::SshState::Ready)
+//     {
+//          qDebug() << "Can't connect to connexion server";
+//     }else
+//          qDebug()  << "SSH connected";
+
+
+//               SshProcess *proc = m_client.getChannel<SshProcess>("command");
+
+//               proc->runCommand(m_shellcommand.at(0));
+
+//               QString localfilehash = Patcher::getfilehash("./1.txt");
+
+//               QString filehash = QString::fromStdString(proc->result().toStdString());
+
+//               filehash.chop(1);
+
+//                  const QString source("./newpatch.tar.gz");
+//                  QString dest("/home/ivan/Remotemachine/newpatch.tar.gz");
+
+//         if(filehash != localfilehash)
+//          {
+//               qDebug()<<filehash<<"   "<<localfilehash;
+//               QEventLoop wait;
+
+//               SshSFtp *mysftp = m_client.getChannel<SshSFtp>("mysftp!");
+//               SshSftpCommandSend *cmd = new SshSftpCommandSend(source,dest,*mysftp);
+//               QObject::connect(mysftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
+
+//               mysftp->processCmd(cmd);
+//               wait.exec();
+//           }
+
+//             SshProcess *procc = m_client.getChannel<SshProcess>("command2");
+
+
+//             procc->runCommand(m_shellcommand.at(1));
+
+
+//             SshProcess *proccc = m_client.getChannel<SshProcess>("command3");
+
+//             proccc->runCommand(m_shellcommand.at(2));
+//             QString filecount = QString::fromStdString(proccc->result().toStdString());
+
+//             if(filecount.toInt() > 10)
+//             {
+
+//             SshProcess *procccc = m_client.getChannel<SshProcess>("command4");
+//             procccc->runCommand(m_shellcommand.at(3));
+
+//             }
+
+//             SshProcess *procccc = m_client.getChannel<SshProcess>("command5");
+//             procccc->runCommand("ls");
+
+
+////             m_client.disconnectFromHost();
+////                 sleep(10);
+////                  client = new SshClient("FIRST CLIENT2");
+////                 client->setPassphrase(cmdargs[3]);
+
+////                 QEventLoop waitsshh;
+////                 QObject::connect(client, &SshClient::sshReady, &waitsshh, &QEventLoop::quit);
+////                 QObject::connect(client, &SshClient::sshError, &waitsshh, &QEventLoop::quit);
+////                 client->connectToHost(cmdargs[1],cmdargs[2],myport,MyByteList);
+////                 waitsshh.exec();
+
+////                 if(client->sshState() != SshClient::SshState::Ready)
+////                  {
+////                       qDebug() << "Can't connect to connexion server";
+
+////                  }else
+////                       qDebug()  << "SSH connected";
+
+//                 //SshProcess *proccccc = client->getChannel<SshProcess>("command5");
+//                 //proccccc->runCommand("shutdown now");
+//}
 
 void MainWindow::save_setting_device()
 {
@@ -113,11 +207,20 @@ void MainWindow::save_setting_device()
     save_device_settings();
 }
 
+void MainWindow::create_setting_device()
+{
+    create_device_settings();
+}
+
 void MainWindow::on_But_add_device_clicked()
 {
-    Device* dev = new Device(this);    
+    Device* dev = new Device(this);
     createRow(dev);
-    ui->but_del_device->setEnabled(true);
+    if(ui->commandtableWidget->rowCount() > 0)
+    {
+        ui->but_del_device->setEnabled(true);
+        ui->But_start_pach->setEnabled(true);
+    }
 }
 
 void MainWindow::on_actionRussian_triggered()
@@ -131,10 +234,10 @@ void MainWindow::on_actionRussian_triggered()
 void MainWindow::changeEvent(QEvent* event)
 {
 
-if(event->type() == QEvent::LanguageChange)
-    ui->retranslateUi(this);
-else
-    QMainWindow::changeEvent(event);
+    if(event->type() == QEvent::LanguageChange)
+        ui->retranslateUi(this);
+    else
+        QMainWindow::changeEvent(event);
 }
 
 void MainWindow::on_actionEnglish_triggered()
@@ -145,7 +248,7 @@ void MainWindow::on_actionEnglish_triggered()
 
 
 
-bool MainWindow::save_device_settings()
+void MainWindow::save_device_settings()
 {
     m_settings->beginGroup("Devices");
     m_settings->beginGroup(ui->commandtableWidget->item(1,2)->text());
@@ -163,8 +266,44 @@ bool MainWindow::save_device_settings()
         m_settings->setValue(QString("command%1").arg(i),m_shellcommand.at(i));
 
     }
-        m_settings->endGroup();
-        m_settings->endGroup();
+    m_settings->endGroup();
+    m_settings->endGroup();
+}
+
+void MainWindow::create_device_settings()
+{
+    Device* dev;
+    QString cmd;
+    CommandWind* wind = new CommandWind(this);
+    wind->setAttribute(Qt::WA_DeleteOnClose, true);
+    connect(wind,SIGNAL(send_command(const QString&)),this,SLOT(recive_command(const QString&)));
+    connect(this,SIGNAL(get_command(QString&)),wind,SLOT(data_recived(QString&)));
+    wind->show();
+    auto pos = ui->commandtableWidget->currentRow();
+    dev = m_device_list.at(pos);
+
+    if(dev != nullptr)
+    {
+        cmd = dev->get_command_list().join("\n");
+        emit get_command(cmd);
+    }
+
+
+
+}
+
+void MainWindow::recive_command(const QString& command)
+{
+    Device* dev;
+    auto pos = ui->commandtableWidget->currentRow();
+
+    QStringList list = command.split("\n");
+  //  Patcher::printlist(list);
+    dev = m_device_list.at(pos);
+
+    dev->set_command_list(list);
+    dev->printself();
+
 }
 
 void MainWindow::saveSettings()
@@ -194,13 +333,13 @@ void MainWindow::saveSettings()
             m_settings->setValue(QString("command%1").arg(j),m_shellcommand.at(j));
 
         }
-            m_settings->endGroup();
+        m_settings->endGroup();
         m_settings->endGroup();
     }
- m_settings->endGroup();
+    m_settings->endGroup();
 }
 
-bool MainWindow::loadSettings()
+void MainWindow::loadSettings()
 {
     Device* device;
     m_settings->beginGroup("Devices");
@@ -220,7 +359,7 @@ bool MainWindow::loadSettings()
 
         for(int j=0; j<child.size(); j++)
         {
-           device->add_command(m_settings->value(QString("command%1").arg(j)).toString());
+            device->add_command(m_settings->value(QString("command%1").arg(j)).toString());
             if(m_settings->value(QString("command%1").arg(j)).toString() == "sftp")
             {
                 m_settings->beginGroup("SFTP");
@@ -230,16 +369,11 @@ bool MainWindow::loadSettings()
             }
 
         }
-              m_settings->endGroup();
+        m_settings->endGroup();
         m_settings->endGroup();
         createRow(device);
-      //  m_device_list.append(device);
     }
-//    for(auto i : m_device_list)
-//    {
-//        i->printself();
 
-//    }
     m_settings->endGroup();
 }
 
@@ -249,10 +383,10 @@ void MainWindow::createRow(Device* dev)
     ui->commandtableWidget->insertRow(ui->commandtableWidget->rowCount());
     auto pos = (ui->commandtableWidget->rowCount() -1);
 
-    ui->commandtableWidget->setItem(pos,0,new QTableWidgetItem(dev->get_host()));
-    ui->commandtableWidget->setItem(pos,1,new QTableWidgetItem(dev->get_user()));
-    ui->commandtableWidget->setItem(pos,2,new QTableWidgetItem(dev->get_device_name()));
-    ui->commandtableWidget->setItem(pos,4,new QTableWidgetItem(QString::number(dev->get_port())));
+    ui->commandtableWidget->setItem(pos, 0, new QTableWidgetItem(dev->get_host()));
+    ui->commandtableWidget->setItem(pos, 1, new QTableWidgetItem(dev->get_user()));
+    ui->commandtableWidget->setItem(pos, 2, new QTableWidgetItem(dev->get_device_name()));
+    ui->commandtableWidget->setItem(pos, 4, new QTableWidgetItem(QString::number(dev->get_port())));
     auto item = new QTableWidgetItem(tr("online?"));
     item->setForeground(Qt::green);
     ui->commandtableWidget->setItem(pos,5, item);
@@ -260,9 +394,9 @@ void MainWindow::createRow(Device* dev)
 
     QPushButton * but_save_set = new QPushButton("Save settings",this);
     QPushButton * but_create_set = new QPushButton("Create settings",this);
-    but_create_set->setEnabled(false);
 
     connect(but_save_set,SIGNAL(clicked()),this, SLOT(save_setting_device()));
+    connect(but_create_set,SIGNAL(clicked()),this, SLOT(create_setting_device()));
 
     ui->commandtableWidget->setCellWidget(pos, 8, but_save_set);
     ui->commandtableWidget->setCellWidget(pos, 7, but_create_set);
@@ -289,8 +423,10 @@ void MainWindow::on_actionLoad_settings_triggered()
         return;
 
     if(ui->commandtableWidget->rowCount() > 0)
-           ui->but_del_device->setEnabled(true);
-
+    {
+        ui->but_del_device->setEnabled(true);
+        ui->But_start_pach->setEnabled(true);
+    }
 }
 
 void MainWindow::on_actionSave_sattings_triggered()
@@ -314,13 +450,17 @@ void MainWindow::on_but_del_device_clicked()
     m_device_list.removeAt(pos);
 
     if(ui->commandtableWidget->rowCount() == 0)
+    {
         ui->but_del_device->setEnabled(false);
+        ui->But_start_pach->setEnabled(false);
+    }
 
     qDebug()<<"Remove: "<<pos<<"\n"<<"Count of element: "<<m_device_list.count();
 
     for(auto i : m_device_list)
     {
         i->printself();
-
     }
 }
+
+

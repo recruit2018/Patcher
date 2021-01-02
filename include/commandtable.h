@@ -1,5 +1,4 @@
-#ifndef COMMANDTABLE_H
-#define COMMANDTABLE_H
+# pragma once
 
 #include <QTableWidget>
 
@@ -10,4 +9,4 @@ public:
     CommandTable(QWidget *parent);
 };
 
-#endif // COMMANDTABLE_H
+

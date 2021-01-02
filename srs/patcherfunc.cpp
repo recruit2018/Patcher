@@ -23,27 +23,27 @@ QStringList jspursing(const QString& filepath)
     QFile jfile(filepath);
     QStringList command;
 
-     if(!jfile.open(QIODevice::ReadOnly))
-     {
+    if(!jfile.open(QIODevice::ReadOnly))
+    {
         qDebug()<<"File not open!";
         return QStringList();
-     }
+    }
     QJsonDocument jsonDoc = QJsonDocument::fromJson(QByteArray(jfile.readAll()));
-     if(jsonDoc.isEmpty())
-             qDebug()<<"File not QJsonDocument ";
+    if(jsonDoc.isEmpty())
+        qDebug()<<"File not QJsonDocument ";
 
     QJsonObject jobj = jsonDoc.object();
-     if(jobj.isEmpty())
-     {
-          qDebug()<<"File not QJsonObject";
-          return QStringList();
-     }
+    if(jobj.isEmpty())
+    {
+        qDebug()<<"File not QJsonObject";
+        return QStringList();
+    }
     QJsonArray jarr = jobj.value("commandshell").toArray();
-     if(jarr.isEmpty())
-     {
-         qDebug()<<"this not array";
-         return QStringList();
-     }
+    if(jarr.isEmpty())
+    {
+        qDebug()<<"this not array";
+        return QStringList();
+    }
     foreach (QJsonValue var, jarr) {
         command.append(var.toObject()["command"].toString());
     }

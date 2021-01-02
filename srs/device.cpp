@@ -2,10 +2,10 @@
 
 Device::Device(QObject *parent) : QObject(parent)
 {
-   // m_shellcommand = Patcher::jspursing("commandshell.json");
+     m_shellcommand = Patcher::jspursing("commandshell.json");
 }
 
-void Device::printself()
+const void Device::printself()
 {
     qDebug()<<m_user<<m_device_name<<m_host<<m_port<<"\n";
     Patcher::printlist(m_shellcommand);

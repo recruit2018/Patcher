@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QTranslator>
@@ -14,6 +13,7 @@
 #include "sshsftpcommandsend.h"
 #include "patcherfunc.h"
 #include "jsoncontroller.h"
+#include "commandwind.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,27 +27,24 @@ private:
     SshProcess *m_proc;
     SshSFtp *m_sftp;
     QStringList m_shellcommand;
-    QString m_user;
-    QString m_device;
-    QString m_host;
-    QString m_pass;
-    QByteArrayList MyByteList;
     QSettings* m_settings;
     QTranslator m_tranclator;
     QString m_localfilepath;
     QString m_destfilepath;
     QList<Device*> m_device_list;
 
-    bool save_device_settings();
-    bool loadSettings();
+    void save_device_settings();
+    void create_device_settings();
+    void loadSettings();
     void saveSettings();
     void createRow(Device* dev = nullptr);
-    inline void addDevice() { m_device_list.append(new Device(this)); }
+    // inline void addDevice() { m_device_list.append(new Device(this)); }
+
 protected:
     void changeEvent(QEvent* event) override;
 public:
     MainWindow(QWidget *parent = nullptr);
-   virtual ~MainWindow();
+    virtual ~MainWindow();
 
 private slots:
     void on_actionRussian_triggered();
@@ -60,15 +57,21 @@ private slots:
 
     void save_setting_device();
 
+    void create_setting_device();
+
     void on_actionLoad_settings_triggered();
 
     void on_actionSave_sattings_triggered();
 
     void on_but_del_device_clicked();
 
+    void recive_command(const QString&);
+
+signals:
+    void get_command(QString&);
+
 private:
     Ui::MainWindow *ui;
 };
 
 
-#endif // MAINWINDOW_H

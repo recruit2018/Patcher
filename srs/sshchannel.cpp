@@ -9,14 +9,13 @@ SshChannel::SshChannel(QString name, SshClient *client)
     , m_sshClient(client)
     , m_name(name)
 {
-
     qCDebug(sshchannel) << "createChannel:" << m_name;
     QObject::connect(m_sshClient, &SshClient::sshDataReceived, this, &SshChannel::sshDataReceived, Qt::QueuedConnection);
 }
 
 SshChannel::~SshChannel()
 {
-    qDebug() << "destroyChannel:" << this;
+    qCDebug(sshchannel) << "destroyChannel:" << this;
     setChannelState(ChannelState::Free);
 }
 
