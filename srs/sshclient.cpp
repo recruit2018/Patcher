@@ -1,8 +1,6 @@
 ﻿#include <QEventLoop>
 #include <QDateTime>
 #include "sshprocess.h"
-#include <sys/types.h>
-#include <sys/socket.h>
 #include "sshclient.h"
 
 Q_LOGGING_CATEGORY(sshclient, "ssh.client", QtWarningMsg)

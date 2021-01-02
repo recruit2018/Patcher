@@ -55,9 +55,19 @@ endif()
 
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${HEADERS_DIR})
+if(WIN32)
+  target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 Libssh2::libssh2 ${QT_LIBRARIES} OpenSSL::SSL)
+endif()
 target_link_libraries(${PROJECT_NAME} Libssh2::libssh2 ${QT_LIBRARIES} OpenSSL::SSL)
 
 message(${CMAKE_SOURCE_DIR})
 message(${CMAKE_CURRENT_SOURCE_DIR})
 message(${PROJECT_SOURCE_DIR})
 message(${${PROJECT_NAME}_SOURCE_DIR})
+
+
+
+install (TARGETS ${PROJECT_NAME}
+       RUNTIME DESTINATION bin
+       LIBRARY DESTINATION lib
+       ARCHIVE DESTINATION lib/archive )

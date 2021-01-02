@@ -22,4 +22,6 @@ $ cmake .. -DBUILD_SHARED_LIBS=ON -DCRYPTO_BACKEND=OpenSSL
 $ cmake --build .
 ```
 
+## Support system: Windows/Linux
 
+## Tested on: Linux Ubuntu 20.04 64 bit, Windows 7 64 bit
