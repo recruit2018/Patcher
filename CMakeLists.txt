@@ -60,12 +60,6 @@ if(WIN32)
 endif()
 target_link_libraries(${PROJECT_NAME} Libssh2::libssh2 ${QT_LIBRARIES} OpenSSL::SSL)
 
-message(${CMAKE_SOURCE_DIR})
-message(${CMAKE_CURRENT_SOURCE_DIR})
-message(${PROJECT_SOURCE_DIR})
-message(${${PROJECT_NAME}_SOURCE_DIR})
-
-
 
 #install (TARGETS ${PROJECT_NAME}
 #       RUNTIME DESTINATION bin

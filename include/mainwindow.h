@@ -11,7 +11,6 @@
 #include "sshsftp.h"
 #include "sshsftpcommandsend.h"
 #include "patcherfunc.h"
-#include "jsoncontroller.h"
 #include "commandwind.h"
 
 QT_BEGIN_NAMESPACE

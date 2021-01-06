@@ -1,5 +1,4 @@
-#ifndef DEVICEMODEL_H
-#define DEVICEMODEL_H
+#pragma once
 
 #include <QAbstractTableModel>
 #include <QTableWidget>
@@ -34,8 +33,6 @@ public:
     QVariant headerData(int, Qt::Orientation, int) const;
     void setHeaders();
 
-
-
 };
 
-#endif // DEVICEMODEL_H
+

@@ -194,11 +194,11 @@ void CommandTable::recive_command(const QString& command)
         dev->set_sftp_local_path(path.at(1));
         dev->set_sftp_remote_path(path.at(2));
     }
-//    else
-//    {
-//        dev->set_sftp_local_path("");
-//        dev->set_sftp_remote_path("");
-//    }
+    //    else
+    //    {
+    //        dev->set_sftp_local_path("");
+    //        dev->set_sftp_remote_path("");
+    //    }
 
     dev->set_command_list(list);
 }

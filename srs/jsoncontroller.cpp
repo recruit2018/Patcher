@@ -12,11 +12,11 @@ JsonCommand::JsonCommand(QJsonObject jobj, QObject * parent):
 
 QStringList JsonCommand::toList(const QJsonArray &array)
 {
-  QStringList list;
-  for (QJsonValue v : array) {
-    list.append(v.toString());
-  }
-  return list;
+    QStringList list;
+    for (QJsonValue v : array) {
+        list.append(v.toString());
+    }
+    return list;
 }
 
 

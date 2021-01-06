@@ -1,5 +1,4 @@
-#ifndef TABLEITEM_H
-#define TABLEITEM_H
+#pragma once
 
 #include <QTableWidgetItem>
 
@@ -9,4 +8,3 @@ public:
     TableItem();
 };
 
-#endif // TABLEITEM_H
