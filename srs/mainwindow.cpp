@@ -6,8 +6,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-
 }
 
 MainWindow::~MainWindow()
@@ -60,49 +58,57 @@ void MainWindow::on_But_start_pach_clicked()
         command = dev->get_command_list();
         for(int j= 0; j < command.count();j++)
         {
-            proc = m_client.getChannel<SshProcess>(QString("command%1").arg(i));
-            if(j == 0)
+            //            proc = m_client.getChannel<SshProcess>(QString("command%1").arg(i));
+            //            if(j == 0)
+            //            {
+            //                proc->runCommand(command.at(j));
+            //                localfilehash = Patcher::getfilehash("./1.txt");
+            //                filehash = QString::fromStdString(proc->result().toStdString());
+            //                filehash.chop(1);
+
+
+            //                if(filehash != localfilehash)
+            //                {
+            //                    qDebug()<<filehash<<"   "<<localfilehash;
+            //                    sftp = m_client.getChannel<SshSFtp>("ftp");
+            //                    cmd = new SshSftpCommandSend(source,dest,*sftp);
+            //                    QEventLoop wait;
+            //                    QObject::connect(sftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
+            //                    sftp->processCmd(cmd);
+            //                    wait.exec();
+            //                }
+            //                continue;
+            //            }
+
+            //            if( j == 2 )
+            //            {
+            //                proc->runCommand(command.at(j));
+            //                filecount = QString::fromStdString(proc->result().toStdString());
+            //                ++j;
+            //                if(filecount.toInt() > 10)
+            //                {
+            //                    proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
+            //                    proc->runCommand(command.at(j));
+
+            //                }
+            //                continue;
+            //            }
+            if(command.at(j).indexOf(QRegExp("^sftp .+")))
             {
-                proc->runCommand(command.at(j));
-                localfilehash = Patcher::getfilehash("./1.txt");
-                filehash = QString::fromStdString(proc->result().toStdString());
-                filehash.chop(1);
-
-
-                if(filehash != localfilehash)
-                {
-                    qDebug()<<filehash<<"   "<<localfilehash;
-                    sftp = m_client.getChannel<SshSFtp>("ftp");
-                    cmd = new SshSftpCommandSend(source,dest,*sftp);
-                    QEventLoop wait;
-                    QObject::connect(sftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
-                    sftp->processCmd(cmd);
-                    wait.exec();
-                }
-                continue;
+                cmd = new SshSftpCommandSend(dev->get_sftp_local_path(),dev->get_sftp_remote_path(),*sftp);
+                sftp = m_client.getChannel<SshSFtp>("ftp");
+                cmd = new SshSftpCommandSend(source,dest,*sftp);
+                QEventLoop wait;
+                QObject::connect(sftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
+                sftp->processCmd(cmd);
+                wait.exec();
             }
-
-            if( j == 2 )
-            {
-                proc->runCommand(command.at(j));
-                filecount = QString::fromStdString(proc->result().toStdString());
-                ++j;
-                if(filecount.toInt() > 10)
-                {
-                    proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
-                    proc->runCommand(command.at(j));
-
-                }
-                continue;
-            }
-
             proc->runCommand(command.at(j));
-
         }
 
         proc = m_client.getChannel<SshProcess>("fsfdfsdf");
         proc->runCommand("ls");
-          m_client.disconnectFromHost();
+        m_client.disconnectFromHost();
     }
 
     ui->But_add_device->setEnabled(true);
@@ -111,91 +117,7 @@ void MainWindow::on_But_start_pach_clicked()
 
 }
 
-//    m_shellcommand = Patcher::jspursing("commandshell.json");
-//    m_client.setPassphrase(m_pass);
-//    QEventLoop waitssh;
-//    QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
-//    QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
-//    m_client.connectToHost(m_user,m_host,22,MyByteList);
-//    waitssh.exec();
 
-//    if(m_client.sshState() != SshClient::SshState::Ready)
-//     {
-//          qDebug() << "Can't connect to connexion server";
-//     }else
-//          qDebug()  << "SSH connected";
-
-
-//               SshProcess *proc = m_client.getChannel<SshProcess>("command");
-
-//               proc->runCommand(m_shellcommand.at(0));
-
-//               QString localfilehash = Patcher::getfilehash("./1.txt");
-
-//               QString filehash = QString::fromStdString(proc->result().toStdString());
-
-//               filehash.chop(1);
-
-//                  const QString source("./newpatch.tar.gz");
-//                  QString dest("/home/ivan/Remotemachine/newpatch.tar.gz");
-
-//         if(filehash != localfilehash)
-//          {
-//               qDebug()<<filehash<<"   "<<localfilehash;
-//               QEventLoop wait;
-
-//               SshSFtp *mysftp = m_client.getChannel<SshSFtp>("mysftp!");
-//               SshSftpCommandSend *cmd = new SshSftpCommandSend(source,dest,*mysftp);
-//               QObject::connect(mysftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
-
-//               mysftp->processCmd(cmd);
-//               wait.exec();
-//           }
-
-//             SshProcess *procc = m_client.getChannel<SshProcess>("command2");
-
-
-//             procc->runCommand(m_shellcommand.at(1));
-
-
-//             SshProcess *proccc = m_client.getChannel<SshProcess>("command3");
-
-//             proccc->runCommand(m_shellcommand.at(2));
-//             QString filecount = QString::fromStdString(proccc->result().toStdString());
-
-//             if(filecount.toInt() > 10)
-//             {
-
-//             SshProcess *procccc = m_client.getChannel<SshProcess>("command4");
-//             procccc->runCommand(m_shellcommand.at(3));
-
-//             }
-
-//             SshProcess *procccc = m_client.getChannel<SshProcess>("command5");
-//             procccc->runCommand("ls");
-
-
-////             m_client.disconnectFromHost();
-////                 sleep(10);
-////                  client = new SshClient("FIRST CLIENT2");
-////                 client->setPassphrase(cmdargs[3]);
-
-////                 QEventLoop waitsshh;
-////                 QObject::connect(client, &SshClient::sshReady, &waitsshh, &QEventLoop::quit);
-////                 QObject::connect(client, &SshClient::sshError, &waitsshh, &QEventLoop::quit);
-////                 client->connectToHost(cmdargs[1],cmdargs[2],myport,MyByteList);
-////                 waitsshh.exec();
-
-////                 if(client->sshState() != SshClient::SshState::Ready)
-////                  {
-////                       qDebug() << "Can't connect to connexion server";
-
-////                  }else
-////                       qDebug()  << "SSH connected";
-
-//                 //SshProcess *proccccc = client->getChannel<SshProcess>("command5");
-//                 //proccccc->runCommand("shutdown now");
-//}
 
 void MainWindow::save_setting_device()
 {
@@ -247,32 +169,6 @@ void MainWindow::on_actionEnglish_triggered()
 {
     qApp->removeTranslator(&m_tranclator);
 }
-
-
-
-
-//void MainWindow::save_device_settings()
-//{
-//    m_settings->beginGroup("Devices");
-//    m_settings->beginGroup(ui->commandtableWidget->item(1,2)->text());
-
-
-//    for(int i=0; i<m_shellcommand.size();i++)
-//    {
-//        if(m_shellcommand.at(i) == "SFTP")
-//        {
-//            m_settings->beginGroup("sftp");
-//            m_settings->setValue("LOCALPATH","./newpatch.tar.gz");
-//            m_settings->setValue("REMOTEPATH","/home/ivan/Remotemachine/newpatch.tar.gz");
-//            m_settings->endGroup();
-//        }
-//        m_settings->setValue(QString("command%1").arg(i),m_shellcommand.at(i));
-
-//    }
-//    m_settings->endGroup();
-//    m_settings->endGroup();
-//}
-
 
 
 void MainWindow::on_actionLoad_settings_triggered()

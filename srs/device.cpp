@@ -14,6 +14,7 @@ QString Device::getvalue(const int &val) const
     case Columns::DeviceName:{return get_device_name(); break;}
     case Columns::Port:{return QString::number(get_port()); break;}
     }
+    return QString("None");
 }
 
 void Device::setvalue(const QString& val, const int &column)
@@ -27,7 +28,7 @@ void Device::setvalue(const QString& val, const int &column)
     };
 }
 
-const void Device::printself()
+void Device::printself() const
 {
     qDebug()<<m_user<<m_device_name<<m_host<<m_port<<"\n";
     Patcher::printlist(m_shellcommand);

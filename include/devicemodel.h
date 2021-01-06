@@ -35,6 +35,7 @@ public:
     void setHeaders();
 
 
+
 };
 
 #endif // DEVICEMODEL_H

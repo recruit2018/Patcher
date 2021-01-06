@@ -48,10 +48,6 @@ void CommandTable::createRow(Device* dev)
 
     setCellWidget(pos, CommandTable::butCRTSettings, but_create_set);
     setCellWidget(pos, CommandTable::butSVSettings, but_save_set);
-
-
-
-
 }
 
 void CommandTable::create_device_settings()
@@ -86,36 +82,6 @@ void CommandTable::addDevice()
 
 void CommandTable::saveSettings()
 {
-    //    auto i= 0;
-    //    m_settings->clear();
-    //    m_settings->beginGroup("Devices");
-    //    for(auto dev : m_device_list)
-    //    {
-    //        m_settings->beginGroup(dev->get_device_name());
-    //        m_settings->setValue("Address",dev->get_host());
-    //        m_settings->setValue("User",dev->get_user());
-    //        m_settings->setValue("Device",dev->get_device_name());
-    //        m_settings->setValue("Port",dev->get_port());
-    //        m_settings->beginGroup("COMMAND");
-    //        for(auto cmnd : dev->get_command_list())
-    //        {
-    //            if(cmnd == "sftp")
-    //            {
-    //                m_settings->beginGroup("SFTP");
-    //                m_settings->setValue("LOCALPATH",dev->get_sftp_local_path());
-    //                m_settings->setValue("REMOTEPATH",dev->get_sftp_remote_path());
-    //                m_settings->endGroup();
-    //                m_settings->setValue(QString("command%1").arg(++i),cmnd);
-    //            }
-    //            m_settings->setValue(QString("command%1").arg(++i),cmnd);
-
-    //        }
-    //        m_settings->endGroup();
-    //        m_settings->endGroup();
-    //    }
-    //    m_settings->endGroup();
-
-
     m_settings->clear();
     m_settings->beginGroup("Devices");
     Device* dev;
@@ -123,22 +89,20 @@ void CommandTable::saveSettings()
     int res=0;
     for(int i =0;i<rowCount();i++)
     {
-        m_settings->beginGroup(item(i,2)->text());  //от девайса копируй
-        m_settings->setValue("Address",item(i,0)->text());
-        m_settings->setValue("User",item(i,1)->text());
-        m_settings->setValue("Device",item(i,2)->text());
-        m_settings->setValue("Port",item(i,4)->text());
-        m_settings->beginGroup("COMMAND");
         dev = m_device_list.at(i);
+        m_settings->beginGroup(dev->get_device_name());
+        m_settings->setValue("Address",dev->get_host());
+        m_settings->setValue("User",dev->get_user());
+        m_settings->setValue("Device",dev->get_device_name());
+        m_settings->setValue("Port",dev->get_port());
+        m_settings->beginGroup("COMMAND");
+
         list = dev->get_command_list();
         for(int j=0; j<list.size();j++)
         {
-            //if(list.at(j) == "sftp")
             res = list.at(j).indexOf(QRegExp("^sftp .+"));
             if(res >=0)
             {
-                qDebug()<<"WHATE!^^^^";
-                Patcher::printlist(list);
                 m_settings->beginGroup("SFTP");
                 m_settings->setValue("LOCALPATH",dev->get_sftp_local_path());
                 m_settings->setValue("REMOTEPATH",dev->get_sftp_remote_path());
@@ -174,7 +138,6 @@ void CommandTable::loadSettings()
 
         for(int j=0; j<child.size(); j++)
         {
-            // if(m_settings->value(QString("command%1").arg(j)).toString() == "sftp")
             if(m_settings->value(QString("command%1").arg(j)).toString().indexOf(QRegExp("^sftp .+")))
             {
                 m_settings->beginGroup("SFTP");
@@ -231,15 +194,13 @@ void CommandTable::recive_command(const QString& command)
         dev->set_sftp_local_path(path.at(1));
         dev->set_sftp_remote_path(path.at(2));
     }
-    else
-    {
-        dev->set_sftp_local_path("");
-        dev->set_sftp_remote_path("");
-    }
+//    else
+//    {
+//        dev->set_sftp_local_path("");
+//        dev->set_sftp_remote_path("");
+//    }
 
     dev->set_command_list(list);
-    qDebug()<<"COMMANDS!";
-    Patcher::printlist(list);
 }
 
 

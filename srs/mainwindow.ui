@@ -182,8 +182,14 @@
     <addaction name="actionSave_sattings"/>
     <addaction name="actionLoad_settings"/>
    </widget>
+   <widget class="QMenu" name="menulog">
+    <property name="title">
+     <string>Log</string>
+    </property>
+   </widget>
    <addaction name="menuLanguafe"/>
    <addaction name="menuSettings"/>
+   <addaction name="menulog"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionRussian">

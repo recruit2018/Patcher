@@ -44,7 +44,7 @@ public:
     inline QString get_sftp_remote_path() const { return m_destfilepath; }
     QString getvalue(const int&) const;
     void setvalue(const QString &, const int& column);
-    const void printself();
+    void printself() const;
 
 signals:
 
