@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    m_settings = new QSettings(QDir::currentPath()+"/settings.ini", QSettings::IniFormat, this);
+
 
 }
 
@@ -68,8 +68,6 @@ void MainWindow::on_But_start_pach_clicked()
                 filehash = QString::fromStdString(proc->result().toStdString());
                 filehash.chop(1);
 
-                // source = dev->get_sftp_local_path();
-                //  dest = dev->get_sftp_remote_path();
 
                 if(filehash != localfilehash)
                 {
@@ -201,21 +199,26 @@ void MainWindow::on_But_start_pach_clicked()
 
 void MainWindow::save_setting_device()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Select command file"));
-    m_shellcommand = Patcher::jspursing(fileName);
 
-    save_device_settings();
+    ui->commandtableWidget->save_device_settings();
 }
 
 void MainWindow::create_setting_device()
 {
-    create_device_settings();
+    CommandWind* wind = new CommandWind(this);
+    wind->setAttribute(Qt::WA_DeleteOnClose, true);
+
+    connect(wind,SIGNAL(send_command(const QString&)),ui->commandtableWidget,SLOT(recive_command(const QString&)));
+    connect(this,SIGNAL(get_command(QString&)),wind,SLOT(data_recived(QString&)));
+    wind->show();
+
+    ui->commandtableWidget->create_device_settings();
 }
 
 void MainWindow::on_But_add_device_clicked()
 {
-    Device* dev = new Device(this);
-    createRow(dev);
+
+    ui->commandtableWidget->addDevice();
     if(ui->commandtableWidget->rowCount() > 0)
     {
         ui->but_del_device->setEnabled(true);
@@ -248,163 +251,27 @@ void MainWindow::on_actionEnglish_triggered()
 
 
 
-void MainWindow::save_device_settings()
-{
-    m_settings->beginGroup("Devices");
-    m_settings->beginGroup(ui->commandtableWidget->item(1,2)->text());
+//void MainWindow::save_device_settings()
+//{
+//    m_settings->beginGroup("Devices");
+//    m_settings->beginGroup(ui->commandtableWidget->item(1,2)->text());
 
 
-    for(int i=0; i<m_shellcommand.size();i++)
-    {
-        if(m_shellcommand.at(i) == "SFTP")
-        {
-            m_settings->beginGroup("sftp");
-            m_settings->setValue("LOCALPATH","./newpatch.tar.gz");
-            m_settings->setValue("REMOTEPATH","/home/ivan/Remotemachine/newpatch.tar.gz");
-            m_settings->endGroup();
-        }
-        m_settings->setValue(QString("command%1").arg(i),m_shellcommand.at(i));
+//    for(int i=0; i<m_shellcommand.size();i++)
+//    {
+//        if(m_shellcommand.at(i) == "SFTP")
+//        {
+//            m_settings->beginGroup("sftp");
+//            m_settings->setValue("LOCALPATH","./newpatch.tar.gz");
+//            m_settings->setValue("REMOTEPATH","/home/ivan/Remotemachine/newpatch.tar.gz");
+//            m_settings->endGroup();
+//        }
+//        m_settings->setValue(QString("command%1").arg(i),m_shellcommand.at(i));
 
-    }
-    m_settings->endGroup();
-    m_settings->endGroup();
-}
-
-void MainWindow::create_device_settings()
-{
-    Device* dev;
-    QString cmd;
-    CommandWind* wind = new CommandWind(this);
-    wind->setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(wind,SIGNAL(send_command(const QString&)),this,SLOT(recive_command(const QString&)));
-    connect(this,SIGNAL(get_command(QString&)),wind,SLOT(data_recived(QString&)));
-    wind->show();
-    auto pos = ui->commandtableWidget->currentRow();
-    dev = m_device_list.at(pos);
-
-    if(dev != nullptr)
-    {
-        cmd = dev->get_command_list().join("\n");
-        emit get_command(cmd);
-    }
-
-
-
-}
-
-void MainWindow::recive_command(const QString& command)
-{
-    Device* dev;
-    auto pos = ui->commandtableWidget->currentRow();
-
-    QStringList list = command.split("\n");
-  //  Patcher::printlist(list);
-    dev = m_device_list.at(pos);
-
-    dev->set_command_list(list);
-    dev->printself();
-
-}
-
-void MainWindow::saveSettings()
-{
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Select command file"));
-    m_shellcommand = Patcher::jspursing(fileName);
-
-    m_settings->beginGroup("Devices");
-
-    for(int i =0;i<ui->commandtableWidget->rowCount();i++)
-    {
-        m_settings->beginGroup(ui->commandtableWidget->item(i,2)->text());
-        m_settings->setValue("Address",ui->commandtableWidget->item(i,0)->text());
-        m_settings->setValue("User",ui->commandtableWidget->item(i,1)->text());
-        m_settings->setValue("Device",ui->commandtableWidget->item(i,2)->text());
-        m_settings->setValue("Port",ui->commandtableWidget->item(i,4)->text());
-        m_settings->beginGroup("COMMAND");
-        for(int j=0; j<m_shellcommand.size();j++)
-        {
-            if(m_shellcommand.at(j) == "sftp")
-            {
-                m_settings->beginGroup("SFTP");
-                m_settings->setValue("LOCALPATH","./newpatch.tar.gz");
-                m_settings->setValue("REMOTEPATH","/home/ivan/Remotemachine/newpatch.tar.gz");
-                m_settings->endGroup();
-            }
-            m_settings->setValue(QString("command%1").arg(j),m_shellcommand.at(j));
-
-        }
-        m_settings->endGroup();
-        m_settings->endGroup();
-    }
-    m_settings->endGroup();
-}
-
-void MainWindow::loadSettings()
-{
-    Device* device;
-    m_settings->beginGroup("Devices");
-    QStringList childlist = m_settings->childGroups();
-    for(int i = 0;i < childlist.size();i++)
-    {
-        device = new Device(this);
-        m_settings->beginGroup(childlist.at(i));
-
-        device->set_addr(m_settings->value("Address").toString());
-        device->set_user(m_settings->value("User").toString());
-        device->set_device_name(m_settings->value("Device").toString());
-        device->set_port(m_settings->value("Port").toUInt());
-
-        m_settings->beginGroup("COMMAND");
-        QStringList child = m_settings->childKeys();
-
-        for(int j=0; j<child.size(); j++)
-        {
-            device->add_command(m_settings->value(QString("command%1").arg(j)).toString());
-            if(m_settings->value(QString("command%1").arg(j)).toString() == "sftp")
-            {
-                m_settings->beginGroup("SFTP");
-                device->set_sftp_local_path(m_settings->value("LOCALPATH").toString());
-                device->set_sftp_remote_path(m_settings->value("REMOTEPATH").toString());
-                m_settings->endGroup();
-            }
-
-        }
-        m_settings->endGroup();
-        m_settings->endGroup();
-        createRow(device);
-    }
-
-    m_settings->endGroup();
-}
-
-void MainWindow::createRow(Device* dev)
-{
-
-    ui->commandtableWidget->insertRow(ui->commandtableWidget->rowCount());
-    auto pos = (ui->commandtableWidget->rowCount() -1);
-
-    ui->commandtableWidget->setItem(pos, 0, new QTableWidgetItem(dev->get_host()));
-    ui->commandtableWidget->setItem(pos, 1, new QTableWidgetItem(dev->get_user()));
-    ui->commandtableWidget->setItem(pos, 2, new QTableWidgetItem(dev->get_device_name()));
-    ui->commandtableWidget->setItem(pos, 4, new QTableWidgetItem(QString::number(dev->get_port())));
-    auto item = new QTableWidgetItem(tr("online?"));
-    item->setForeground(Qt::green);
-    ui->commandtableWidget->setItem(pos,5, item);
-    ui->commandtableWidget->setItem(pos,6,new QTableWidgetItem(tr("file transfer ->")));
-
-    QPushButton * but_save_set = new QPushButton("Save settings",this);
-    QPushButton * but_create_set = new QPushButton("Create settings",this);
-
-    connect(but_save_set,SIGNAL(clicked()),this, SLOT(save_setting_device()));
-    connect(but_create_set,SIGNAL(clicked()),this, SLOT(create_setting_device()));
-
-    ui->commandtableWidget->setCellWidget(pos, 8, but_save_set);
-    ui->commandtableWidget->setCellWidget(pos, 7, but_create_set);
-
-    m_device_list.append(dev);
-
-}
-
+//    }
+//    m_settings->endGroup();
+//    m_settings->endGroup();
+//}
 
 
 
@@ -417,7 +284,7 @@ void MainWindow::on_actionLoad_settings_triggered()
     if(ret == QMessageBox::Ok)
     {
         ui->commandtableWidget->setRowCount(0);
-        loadSettings();
+        ui->commandtableWidget->loadSettings();
     }
     else
         return;
@@ -437,29 +304,20 @@ void MainWindow::on_actionSave_sattings_triggered()
                                    QMessageBox::Ok | QMessageBox::Cancel);
     if(ret == QMessageBox::Ok)
     {
-        saveSettings();
+        ui->commandtableWidget->saveSettings();
     }
     else
         return;
 }
 
 void MainWindow::on_but_del_device_clicked()
-{  
-    auto pos = ui->commandtableWidget->currentRow();
-    ui->commandtableWidget->removeRow(pos);
-    m_device_list.removeAt(pos);
+{     
+    ui->commandtableWidget->delCurRow();
 
     if(ui->commandtableWidget->rowCount() == 0)
     {
         ui->but_del_device->setEnabled(false);
         ui->But_start_pach->setEnabled(false);
-    }
-
-    qDebug()<<"Remove: "<<pos<<"\n"<<"Count of element: "<<m_device_list.count();
-
-    for(auto i : m_device_list)
-    {
-        i->printself();
     }
 }
 

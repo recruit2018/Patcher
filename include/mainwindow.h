@@ -3,7 +3,6 @@
 #include <QMainWindow>
 #include <QTranslator>
 #include <QFileDialog>
-#include <QSettings>
 #include <QList>
 #include <QMessageBox>
 #include "device.h"
@@ -27,18 +26,11 @@ private:
     SshProcess *m_proc;
     SshSFtp *m_sftp;
     QStringList m_shellcommand;
-    QSettings* m_settings;
     QTranslator m_tranclator;
     QString m_localfilepath;
     QString m_destfilepath;
     QList<Device*> m_device_list;
 
-    void save_device_settings();
-    void create_device_settings();
-    void loadSettings();
-    void saveSettings();
-    void createRow(Device* dev = nullptr);
-    // inline void addDevice() { m_device_list.append(new Device(this)); }
 
 protected:
     void changeEvent(QEvent* event) override;
@@ -65,10 +57,8 @@ private slots:
 
     void on_but_del_device_clicked();
 
-    void recive_command(const QString&);
-
 signals:
-    void get_command(QString&);
+
 
 private:
     Ui::MainWindow *ui;

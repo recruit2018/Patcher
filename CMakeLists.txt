@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
-project(Patcher VERSION 0.1 LANGUAGES C CXX)
+project(Patcher VERSION 0.2 LANGUAGES CXX)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -20,7 +20,7 @@ set(UI_FILE ${SOURSE_DIR}/mainwindow.ui ${SOURSE_DIR}/commandwind.ui)
 set(HEADERS ${HEADERS_DIR}/sshclient.h ${HEADERS_DIR}/sshchannel.h ${HEADERS_DIR}/sshkey.h ${HEADERS_DIR}/sshprocess.h
     ${HEADERS_DIR}/sshsftp.h ${HEADERS_DIR}/sshsftpcommandsend.h ${HEADERS_DIR}/sshsftpcommand.h
     ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/jsoncontroller.h ${HEADERS_DIR}/commandtable.h ${HEADERS_DIR}/mainwindow.h
-    ${HEADERS_DIR}/device.h ${HEADERS_DIR}/commandwind.h)
+    ${HEADERS_DIR}/device.h ${HEADERS_DIR}/commandwind.h ${HEADERS_DIR}/tableitem.h ${HEADERS_DIR}/devicemodel.h)
 
 aux_source_directory(./srs SRC_LIST)
 
@@ -67,7 +67,7 @@ message(${${PROJECT_NAME}_SOURCE_DIR})
 
 
 
-install (TARGETS ${PROJECT_NAME}
-       RUNTIME DESTINATION bin
-       LIBRARY DESTINATION lib
-       ARCHIVE DESTINATION lib/archive )
+#install (TARGETS ${PROJECT_NAME}
+#       RUNTIME DESTINATION bin
+#       LIBRARY DESTINATION lib
+#       ARCHIVE DESTINATION lib/archive )
