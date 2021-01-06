@@ -5,15 +5,17 @@
 #include <QTcpSocket>
 #include <QTimer>
 #include <QMutex>
+#include <sys/types.h>
 #include "sshchannel.h"
 #include "sshkey.h"
 
 #ifdef _WIN64
 #include <winsock2.h>
 #endif
-
-#include <sys/types.h>
+#ifdef __linux__
 #include <sys/socket.h>
+#endif
+
 
 #ifndef FALLTHROUGH
 #if __has_cpp_attribute(fallthrough)
