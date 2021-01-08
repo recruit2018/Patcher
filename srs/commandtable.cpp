@@ -1,6 +1,6 @@
 #include "commandtable.h"
 
-CommandTable::CommandTable(QWidget * parent): QTableWidget(parent)
+CommandTable::CommandTable(QWidget * parent): QAbstractTableModel(parent)
 {
     m_settings = new QSettings(QDir::currentPath()+"/settings.ini", QSettings::IniFormat, this);
     connect(this, SIGNAL(itemChanged(QTableWidgetItem*)),this, SLOT(somethingChanged(QTableWidgetItem*)));

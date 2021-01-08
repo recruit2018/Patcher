@@ -25,7 +25,7 @@ QVariant DeviceModel::data(const QModelIndex& index, int role) const
 
     if(role == Qt::TextAlignmentRole)
         return int(Qt::AlignRight | Qt::AlignCenter);
-    else if(role == Qt::DisplayRole)
+    else if(role == Qt::DisplayRole || role == Qt::EditRole)
     {
         return getvalue(index.row(),index.column());
     }
@@ -63,16 +63,20 @@ bool DeviceModel::setData(const QModelIndex& index, const QVariant& value, int r
 Qt::ItemFlags DeviceModel::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
-    flags |= Qt::ItemIsEditable;
+    flags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
     return flags;
 }
 
-QVariant DeviceModel::headerData(int section, Qt::Orientation orient, int role) const
+QVariant DeviceModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(role == Qt::DisplayRole)
+    if(role != Qt::DisplayRole)
+        return QVariant();
+
+    if(orientation == Qt::Horizontal)
         return m_headers.at(section);
-    return QVariant();
+    else
+        return QVariant();
 }
 
 void DeviceModel::setHeaders()

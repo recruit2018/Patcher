@@ -28,107 +28,7 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="CommandTable" name="commandtableWidget">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>1980</width>
-        <height>1024</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="autoFillBackground">
-       <bool>false</bool>
-      </property>
-      <property name="verticalScrollBarPolicy">
-       <enum>Qt::ScrollBarAsNeeded</enum>
-      </property>
-      <property name="horizontalScrollBarPolicy">
-       <enum>Qt::ScrollBarAsNeeded</enum>
-      </property>
-      <property name="sizeAdjustPolicy">
-       <enum>QAbstractScrollArea::AdjustIgnored</enum>
-      </property>
-      <property name="autoScroll">
-       <bool>true</bool>
-      </property>
-      <property name="verticalScrollMode">
-       <enum>QAbstractItemView::ScrollPerItem</enum>
-      </property>
-      <attribute name="horizontalHeaderCascadingSectionResizes">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="horizontalHeaderDefaultSectionSize">
-       <number>100</number>
-      </attribute>
-      <attribute name="horizontalHeaderStretchLastSection">
-       <bool>true</bool>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>Ip Address</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>User</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Device name</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Password</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Port</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Stage</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Status</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string notr="true">Create settings</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Save settings</string>
-       </property>
-      </column>
-     </widget>
+     <widget class="QTableView" name="tableView"/>
     </item>
     <item>
      <widget class="QPushButton" name="But_add_device">
@@ -213,13 +113,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>CommandTable</class>
-   <extends>QTableWidget</extends>
-   <header>commandtable.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

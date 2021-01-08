@@ -12,6 +12,7 @@
 #include "sshsftpcommandsend.h"
 #include "patcherfunc.h"
 #include "commandwind.h"
+#include "devicemodel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,7 +30,7 @@ private:
     QString m_localfilepath;
     QString m_destfilepath;
     QList<Device*> m_device_list;
-
+    DeviceModel* m_model;
 
 protected:
     void changeEvent(QEvent* event) override;

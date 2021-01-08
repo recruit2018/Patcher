@@ -15,7 +15,7 @@
 
 
 
-class CommandTable : public QTableWidget
+class CommandTable : public QAbstractTableModel
 {
     Q_OBJECT
 private:    
