@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QtDebug>
-#include "patcherfunc.h"
+
 
 class Device : public QObject
 {

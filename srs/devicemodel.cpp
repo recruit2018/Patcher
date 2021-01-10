@@ -13,7 +13,7 @@ int DeviceModel::rowCount(const QModelIndex&) const
 
 int DeviceModel::columnCount(const QModelIndex&) const
 {
-    return m_device_list.count();
+    return m_headers.count();
 }
 
 QVariant DeviceModel::data(const QModelIndex& index, int role) const
@@ -40,10 +40,10 @@ QVariant DeviceModel::getvalue(const int& row, const int& column) const
     return dev->getvalue(column);
 }
 
-void DeviceModel::setvalue(const QString& val, const int &column)
+void DeviceModel::setvalue(const QString& val, const int row, const int &column)
 {
     Device* dev;
-    dev = m_device_list.at(column);
+    dev = m_device_list.at(row);
     dev->setvalue(val,column);
 }
 
@@ -51,7 +51,7 @@ bool DeviceModel::setData(const QModelIndex& index, const QVariant& value, int r
 {
     if(role == Qt::EditRole)
     {
-        setvalue(value.toString(),index.column());
+        setvalue(value.toString(),index.row(),index.column());
         QModelIndex item = createIndex(index.row(),index.column());
         emit dataChanged(index, index);
         emit dataChanged(item, item);
@@ -77,6 +77,7 @@ QVariant DeviceModel::headerData(int section, Qt::Orientation orientation, int r
         return m_headers.at(section);
     else
         return QVariant();
+
 }
 
 void DeviceModel::setHeaders()
@@ -84,6 +85,22 @@ void DeviceModel::setHeaders()
     m_headers << tr("Ip Address")<< tr("User")<< tr("Device name")
               << tr("Password")<< tr("Port")<< tr("Stage")
               << tr("Status")<< tr("Create setting")<< tr("Save setting");
+
+}
+
+void DeviceModel::createRow(Device* dev)
+{
+    beginInsertRows(QModelIndex(),m_device_list.count(),m_device_list.count());
+    m_device_list.append(dev);
+
+    endInsertRows();
+    emit(dataChanged(index(m_device_list.count(), 0), index(m_device_list.count(), 2)));
+
+}
+
+void DeviceModel::deleteRow(int pos)
+{
+
 }
 
 

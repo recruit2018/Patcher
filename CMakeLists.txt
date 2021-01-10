@@ -20,7 +20,7 @@ set(UI_FILE ${SOURSE_DIR}/mainwindow.ui ${SOURSE_DIR}/commandwind.ui)
 set(HEADERS ${HEADERS_DIR}/sshclient.h ${HEADERS_DIR}/sshchannel.h ${HEADERS_DIR}/sshkey.h ${HEADERS_DIR}/sshprocess.h
     ${HEADERS_DIR}/sshsftp.h ${HEADERS_DIR}/sshsftpcommandsend.h ${HEADERS_DIR}/sshsftpcommand.h
     ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/jsoncontroller.h ${HEADERS_DIR}/commandtable.h ${HEADERS_DIR}/mainwindow.h
-    ${HEADERS_DIR}/device.h ${HEADERS_DIR}/commandwind.h ${HEADERS_DIR}/tableitem.h ${HEADERS_DIR}/devicemodel.h)
+    ${HEADERS_DIR}/device.h ${HEADERS_DIR}/commandwind.h ${HEADERS_DIR}/tableitem.h ${HEADERS_DIR}/devicemodel.h ${HEADERS_DIR}/devicedelegate.h)
 
 aux_source_directory(./srs SRC_LIST)
 
@@ -56,7 +56,7 @@ endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${HEADERS_DIR})
 if(WIN32)
-  target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 Libssh2::libssh2 ${QT_LIBRARIES} OpenSSL::SSL)
+ target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 iphlpapi Libssh2::libssh2 ${QT_LIBRARIES} OpenSSL::SSL)
 endif()
 target_link_libraries(${PROJECT_NAME} Libssh2::libssh2 ${QT_LIBRARIES} OpenSSL::SSL)
 
