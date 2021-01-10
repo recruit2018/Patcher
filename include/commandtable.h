@@ -9,9 +9,15 @@
 #include <QDir>
 #include <QPushButton>
 #include <QDebug>
+#include <QTimer>
+#include <QThread>
 #include "device.h"
+#include "sshclient.h"
 #include "commandwind.h"
 #include "patcherfunc.h"
+#include "sshprocess.h"
+#include "sshsftp.h"
+#include "sshsftpcommandsend.h"
 
 
 
@@ -21,6 +27,10 @@ class CommandTable : public QTableWidget
 private:    
     QList<Device*> m_device_list;
     QSettings* m_settings;
+    SshClient m_client;
+    SshProcess* m_proc;
+    SshSFtp* m_sftp;
+    QThread* m_thread;
 
 public:
     enum Columns {
@@ -44,6 +54,7 @@ public:
     void loadSettings();
     void delCurRow();
     void getDeviceList();
+    void startPatching();
 
 private slots:
     void recive_command(const QString&);

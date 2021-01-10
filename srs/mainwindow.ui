@@ -183,6 +183,9 @@
     <addaction name="actionLoad_settings"/>
    </widget>
    <widget class="QMenu" name="menulog">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Log</string>
     </property>

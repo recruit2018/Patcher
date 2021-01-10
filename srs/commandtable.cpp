@@ -1,5 +1,99 @@
 #include "commandtable.h"
 
+void CommandTable::startPatching()
+{
+    Device * dev;
+    QStringList command;
+    SshSFtp* sftp;
+    SshProcess* proc;
+    SshSftpCommandSend* cmd;
+    QByteArrayList MyByteList;
+    MyByteList.append("password");
+
+    QString source("./newpatch.tar.gz");
+    QString dest("/home/ivan/Remotemachine/newpatch.tar.gz");
+
+    QString localfilehash;
+    QString filehash;
+    QString filecount;
+
+    for(int i= 0; i < m_device_list.count(); i++)
+    {
+        dev = m_device_list.at(i);
+
+        m_client.setPassphrase(item(i,3)->text());
+
+        QEventLoop waitssh;
+        QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
+        QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
+        m_client.connectToHost(dev->get_user(),dev->get_host(),dev->get_port(),MyByteList);
+        waitssh.exec();
+
+        if(m_client.sshState() != SshClient::SshState::Ready)
+        {
+            qDebug() << "Can't connect to connexion server";
+        }else
+            qDebug()  << "SSH connected";
+
+        command = Patcher::jspursing("./commandshell.json");
+       // command = dev->get_command_list();
+        for(int j= 0; j < command.count();j++)
+        {
+                        proc = m_client.getChannel<SshProcess>(QString("command%1").arg(i));
+                        if(j == 0)
+                        {
+                            proc->runCommand(command.at(j));
+                            localfilehash = Patcher::getfilehash("./1.txt");
+                            filehash = QString::fromStdString(proc->result().toStdString());
+                            filehash.chop(1);
+
+
+                            if(filehash != localfilehash)
+                            {
+                                qDebug()<<filehash<<"   "<<localfilehash;
+                                sftp = m_client.getChannel<SshSFtp>("ftp");
+                                cmd = new SshSftpCommandSend(source,dest,*sftp);
+                                QEventLoop wait;
+                                QObject::connect(sftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
+                                sftp->processCmd(cmd);
+                                wait.exec();
+                            }
+                            continue;
+                        }
+
+                        if( j == 2 )
+                        {
+                            qDebug()<<"!!!";
+                            proc->runCommand(command.at(j));
+                            filecount = QString::fromStdString(proc->result().toStdString());
+                            ++j;
+                            if(filecount.toInt() > 10)
+                            {
+                                proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
+                                proc->runCommand(command.at(j));
+
+                            }
+                            continue;
+                        }
+//            if(command.at(j).indexOf(QRegExp("^sftp .+")))
+//            {
+//                cmd = new SshSftpCommandSend(dev->get_sftp_local_path(),dev->get_sftp_remote_path(),*sftp);
+//                sftp = m_client.getChannel<SshSFtp>("ftp");
+//                cmd = new SshSftpCommandSend(source,dest,*sftp);
+//                QEventLoop wait;
+//                QObject::connect(sftp, &SshSFtp::finish, &wait, &QEventLoop::quit);
+//                sftp->processCmd(cmd);
+//                wait.exec();
+//            }
+            proc->runCommand(command.at(j));
+        }
+
+        proc = m_client.getChannel<SshProcess>("fsfdfsdf");
+        proc->runCommand("ls");
+        m_client.disconnectFromHost();
+    }
+}
+
 CommandTable::CommandTable(QWidget * parent): QTableWidget(parent)
 {
     m_settings = new QSettings(QDir::currentPath()+"/settings.ini", QSettings::IniFormat, this);
@@ -90,7 +184,7 @@ void CommandTable::saveSettings()
     for(int i =0;i<rowCount();i++)
     {
         dev = m_device_list.at(i);
-        m_settings->beginGroup(dev->get_device_name());
+        m_settings->beginGroup(QString(dev->get_device_name())+QString::number(i));
         m_settings->setValue("Address",dev->get_host());
         m_settings->setValue("User",dev->get_user());
         m_settings->setValue("Device",dev->get_device_name());

@@ -6,10 +6,6 @@
 #include <QList>
 #include <QMessageBox>
 #include "device.h"
-#include "sshclient.h"
-#include "sshprocess.h"
-#include "sshsftp.h"
-#include "sshsftpcommandsend.h"
 #include "patcherfunc.h"
 #include "commandwind.h"
 
@@ -21,15 +17,8 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    SshClient m_client;
-    SshProcess *m_proc;
-    SshSFtp *m_sftp;
-    QStringList m_shellcommand;
-    QTranslator m_tranclator;
-    QString m_localfilepath;
-    QString m_destfilepath;
-    QList<Device*> m_device_list;
 
+    QTranslator m_tranclator;
 
 protected:
     void changeEvent(QEvent* event) override;
