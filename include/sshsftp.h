@@ -6,6 +6,7 @@
 #include <QEventLoop>
 #include <QTimer>
 #include <QStringList>
+#include <QHash>
 #include <QLoggingCategory>
 
 class SshSftpCommand;
@@ -25,6 +26,7 @@ private:
     SshSftpCommand *m_currentCmd {nullptr};
 
     QHash<QString,  LIBSSH2_SFTP_ATTRIBUTES> m_fileinfo;
+    LIBSSH2_SFTP_ATTRIBUTES getFileInfo(const QString &path);
 
 protected:
     SshSFtp(const QString &name, SshClient * client);
@@ -35,6 +37,15 @@ public:
     void close() override;
 
     QString send(const QString &source, QString dest);
+    bool get(const QString &source, QString dest, bool override = false);
+    int mkdir(const QString &dest, int mode = 0755);
+    QStringList readdir(const QString &d);
+    bool isDir(const QString &d);
+    bool isFile(const QString &d);
+    int mkpath(const QString &dest);
+    bool unlink(const QString &d);
+    quint64 filesize(const QString &d);
+
     LIBSSH2_SFTP *getSftpSession() const;
     bool processCmd(SshSftpCommand *cmd);
 

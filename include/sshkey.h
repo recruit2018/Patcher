@@ -21,4 +21,3 @@ public:
     Type       type {UnknownType};
 };
 
-

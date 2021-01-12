@@ -43,4 +43,3 @@ signals:
     void stateChanged(CommandState state);
 };
 
-
