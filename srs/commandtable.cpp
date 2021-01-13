@@ -1,122 +1,20 @@
 #include "commandtable.h"
 
-void CommandTable::startPatching()
-{
-
-    Device * dev;
-    QStringList command;
-
-    SshSftpCommandSend* cmd;
-    QByteArrayList MyByteList;
-    MyByteList.append("password");
-
-    QString localfilehash;
-    QString filehash;
-    QString filecount;
-
-    for(int i= 0; i < m_device_list.count(); i++)
-    {
-        dev = m_device_list.at(i);
-    qDebug()<<"NEW";
-        m_client.setPassphrase(item(i,3)->text());
-
-        QEventLoop waitssh;
-        QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
-        QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
-        m_client.connectToHost(dev->get_user(),dev->get_host(),dev->get_port(),MyByteList);
-        waitssh.exec();
-
-        if(m_client.sshState() != SshClient::SshState::Ready)
-        {
-            qDebug() << "Can't connect to connexion server";
-        }else
-            qDebug()  << "SSH connected";
-
-        command = dev->get_command_list();
-        for(int j= 0; j < command.count();j++)
-        {
-                        m_proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
-                        if(j == 0)
-                        {
-                            QEventLoop waitproc;
-                            QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
-                            QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
-                            m_proc->runCommand(command.at(j));
-                            waitproc.exec();
-
-                            filehash = QString::fromStdString(m_proc->result().toStdString());
-                            filehash.chop(1);
-                            localfilehash = Patcher::getfilehash("./1.txt");
-
-
-
-                            if(filehash != localfilehash)
-                            {
-                                ++j;
-                                qDebug()<<filehash<<"   "<<localfilehash;
-
-                                if((command.at(j).indexOf(QRegExp("^sftp .+"))) >= 0)
-                                {
-                                    m_sftp = m_client.getChannel<SshSFtp>("ftp");
-                                    cmd = new SshSftpCommandSend(dev->get_sftp_local_path(),dev->get_sftp_remote_path(),*m_sftp);
-                                    m_sftp->processCmd(cmd);
-                                }
-                            }
-                            continue;
-                        }
-
-                        if( j == 2 )
-                        {
-                            QEventLoop waitproc;
-                            QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
-                            QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
-                            m_proc->runCommand(command.at(j));
-                            waitproc.exec();
-                            filecount = QString::fromStdString(m_proc->result().toStdString());
-                            ++j;
-                            if(filecount.toInt() > 10)
-                            {
-                                 qDebug()  <<command.at(j);
-                                m_proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
-                                QEventLoop waitproc;
-                                QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
-                                QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
-                                m_proc->runCommand(command.at(j));
-                                waitproc.exec();
-                            }
-                            continue;
-                        }
-
-
-                        QEventLoop waitproc;
-                        QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
-                        QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
-                        m_proc->runCommand(command.at(j));
-                        waitproc.exec();
-        }
-
-//        m_proc = m_client.getChannel<SshProcess>("fsfdfsdf");
-//        QEventLoop waitproc;
-//        QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
-//        QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
-//        m_proc->runCommand("ls");
-//        waitproc.exec();
-
-
-        QEventLoop waitcli;
-        m_client.disconnectFromHost();
-        QObject::connect(&m_client, &SshClient::sshDisconnected, &waitcli, &QEventLoop::quit);
-        QObject::connect(&m_client, &SshClient::sshError, &waitcli, &QEventLoop::quit);
-        waitcli.exec();
-
-    }
-}
-
 CommandTable::CommandTable(QWidget * parent): QTableWidget(parent)
 {
+    m_thread = new QThread(this);
+    m_deviceIcmp = new DeviceIcmp();
+    m_timerStatus = new QTimer(this);
     m_settings = new QSettings(QDir::currentPath()+"/settings.ini", QSettings::IniFormat, this);
-    connect(this, SIGNAL(itemChanged(QTableWidgetItem*)),this, SLOT(somethingChanged(QTableWidgetItem*)));
 
+    connect(m_timerStatus,SIGNAL(timeout()),this,SLOT(polling()));
+    connect(this, SIGNAL(itemChanged(QTableWidgetItem*)),this, SLOT(somethingChanged(QTableWidgetItem*)));
+    connect(this,SIGNAL(ask_status(const QString&, int)),m_deviceIcmp,SLOT(getStatus(const QString&, int)));
+    connect(m_deviceIcmp,SIGNAL(send_status(bool, int)), this, SLOT(setStatus(bool, int)));
+
+    m_deviceIcmp->moveToThread(m_thread);
+    m_timerStatus->start(2000);
+    m_thread->start();
 }
 
 void CommandTable::somethingChanged(QTableWidgetItem* item)
@@ -137,6 +35,22 @@ void CommandTable::somethingChanged(QTableWidgetItem* item)
     };
 }
 
+void CommandTable::setStatus(bool val, int index)
+{
+    QTableWidgetItem* it;
+    it=item(index,Columns::Status);
+
+    if(val){
+        it->setText("online");
+        it->setForeground(Qt::green);
+    }
+    else
+    {
+        it->setForeground(Qt::red);
+        it->setText("offline");
+    }
+}
+
 void CommandTable::createRow(Device* dev)
 {
     insertRow(rowCount());
@@ -147,10 +61,9 @@ void CommandTable::createRow(Device* dev)
     setItem(pos, CommandTable::DeviceName, new QTableWidgetItem(dev->get_device_name()));
     setItem(pos, CommandTable::Port, new QTableWidgetItem(QString::number(dev->get_port())));
 
-    auto item = new QTableWidgetItem(tr("online?"));
-    item->setForeground(Qt::green);
-    setItem(pos,CommandTable::Stage, item);
-    setItem(pos,CommandTable::Status,new QTableWidgetItem(tr("file transfer ->")));
+    auto item = new QTableWidgetItem(tr("unknown"));
+    setItem(pos,CommandTable::Status, item);
+    setItem(pos,CommandTable::Stage,new QTableWidgetItem(tr("file transfer ->")));
 
     QPushButton * but_save_set = new QPushButton("Save settings",this);
     QPushButton * but_create_set = new QPushButton("Create settings",this);
@@ -167,10 +80,12 @@ void CommandTable::create_device_settings()
     Device* dev;
     QString cmd;
     CommandWind* wind = new CommandWind(this);
+
     wind->setAttribute(Qt::WA_DeleteOnClose, true);
     connect(wind,SIGNAL(send_command(const QString&)),this,SLOT(recive_command(const QString&)));
     connect(this,SIGNAL(get_command(QString&)),wind,SLOT(data_recived(QString&)));
     wind->show();
+
     auto pos = currentRow();
     dev = m_device_list.at(pos);
 
@@ -287,8 +202,6 @@ void CommandTable::getDeviceList()
 
 }
 
-
-
 void CommandTable::recive_command(const QString& command)
 {
     Device* dev;
@@ -314,5 +227,131 @@ void CommandTable::recive_command(const QString& command)
 
     dev->set_command_list(list);
 }
+//Bad slot. Temporary implementation
+void CommandTable::polling()
+{
+    Device* dev;
+    if (m_device_list.isEmpty())
+        return;
+    for(int i=0;i<m_device_list.count();i++)
+    {
+        dev = m_device_list.at(i);
+        emit ask_status(dev->get_host(),i);
+    }
+}
+
+void CommandTable::startPatching()
+{
+
+    Device * dev;
+    QStringList command;
+
+    SshSftpCommandSend* cmd;
+    QByteArrayList MyByteList;
+    MyByteList.append("password");
+
+    QString localfilehash;
+    QString filehash;
+    QString filecount;
+
+    for(int i= 0; i < m_device_list.count(); i++)
+    {
+        dev = m_device_list.at(i);
+        m_client.setPassphrase(item(i,3)->text());
+
+        QEventLoop waitssh;
+        QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
+        QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
+        m_client.connectToHost(dev->get_user(),dev->get_host(),dev->get_port(),MyByteList);
+        waitssh.exec();
+
+        if(m_client.sshState() != SshClient::SshState::Ready)
+        {
+            qDebug() << "Can't connect to connexion server";
+        }else
+            qDebug()  << "SSH connected";
+
+        command = dev->get_command_list();
+        for(int j= 0; j < command.count();j++)
+        {
+            m_proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
+#ifdef TASKS
+            if(j == 0)
+            {
+                QEventLoop waitproc;
+                QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
+                QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
+                m_proc->runCommand(command.at(j));
+                waitproc.exec();
+
+                filehash = QString::fromStdString(m_proc->result().toStdString());
+                filehash.chop(1);
+                localfilehash = Patcher::getfilehash("./1.txt");
 
 
+
+                if(filehash != localfilehash)
+                {
+                    ++j;
+                    qDebug()<<filehash<<"   "<<localfilehash;
+
+                    if((command.at(j).indexOf(QRegExp("^sftp .+"))) >= 0)
+                    {
+                        m_sftp = m_client.getChannel<SshSFtp>("ftp");
+                        cmd = new SshSftpCommandSend(dev->get_sftp_local_path(),dev->get_sftp_remote_path(),*m_sftp);
+                        m_sftp->processCmd(cmd);
+                    }
+                }
+                continue;
+            }
+
+            if( j == 2 )
+            {
+                QEventLoop waitproc;
+                QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
+                QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
+                m_proc->runCommand(command.at(j));
+                waitproc.exec();
+                filecount = QString::fromStdString(m_proc->result().toStdString());
+                ++j;
+                if(filecount.toInt() > 10)
+                {
+                    qDebug()  <<command.at(j);
+                    m_proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
+                    QEventLoop waitproc;
+                    QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
+                    QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
+                    m_proc->runCommand(command.at(j));
+                    waitproc.exec();
+                }
+                continue;
+            }
+#endif
+            if((command.at(j).indexOf(QRegExp("^sftp .+"))) >= 0)
+            {
+                m_sftp = m_client.getChannel<SshSFtp>("ftp");
+                cmd = new SshSftpCommandSend(dev->get_sftp_local_path(),dev->get_sftp_remote_path(),*m_sftp);
+                m_sftp->processCmd(cmd);
+            }
+
+            QEventLoop waitproc;
+            QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
+            QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
+            m_proc->runCommand(command.at(j));
+            waitproc.exec();
+        }
+
+        QEventLoop waitcli;
+        m_client.disconnectFromHost();
+        QObject::connect(&m_client, &SshClient::sshDisconnected, &waitcli, &QEventLoop::quit);
+        QObject::connect(&m_client, &SshClient::sshError, &waitcli, &QEventLoop::quit);
+        waitcli.exec();
+
+    }
+}
+
+CommandTable::~CommandTable()
+{
+    m_thread->quit();
+    m_thread->wait();
+}

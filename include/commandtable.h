@@ -16,6 +16,7 @@
 #include "commandwind.h"
 #include "patcherfunc.h"
 #include "sshprocess.h"
+#include "deviceicmp.h"
 #include "sshsftp.h"
 #include "sshsftpcommandsend.h"
 
@@ -31,6 +32,8 @@ private:
     SshProcess* m_proc;
     SshSFtp* m_sftp;
     QThread* m_thread;
+    DeviceIcmp* m_deviceIcmp;
+    QTimer* m_timerStatus;
 
 public:
     enum Columns {
@@ -55,11 +58,13 @@ public:
     void delCurRow();
     void getDeviceList();
     void startPatching();
+    virtual ~CommandTable();
 
 private slots:
     void recive_command(const QString&);
-
+    void polling();
     void somethingChanged(QTableWidgetItem*);
+    void setStatus(bool,int);
 
 public slots:
     void create_device_settings();
@@ -68,6 +73,7 @@ public slots:
 
 signals:
     void get_command(QString&);
+    void ask_status(const QString&,int);
 };
 
 
