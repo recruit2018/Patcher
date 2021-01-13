@@ -156,6 +156,7 @@ signals:
     void sshDataReceived();
     void sshEvent();
     void channelsChanged(int);
+    void disconected();
 };
 
 inline const char* sshErrorToString(int err)

@@ -12,11 +12,7 @@ Q_LOGGING_CATEGORY(sshclient, "ssh.client", QtWarningMsg)
 
 #if !defined(MAX_LOST_KEEP_ALIVE)
 
-/*
- * Maximum keep alive cycle (generally 5s) before connection is
- * considered as lost
- * Default: 6 (30s)
- */
+
 #define MAX_LOST_KEEP_ALIVE 6
 #endif
 
@@ -159,6 +155,7 @@ bool SshClient::waitForState(SshState state)
 
 void SshClient::disconnectFromHost()
 {
+
     qCDebug(sshclient) << m_name << ": disconnectFromHost(): state is " << m_sshState << " and channel size is " << m_channels.size();
     if(m_sshState == SshState::Unconnected)
         return;
@@ -168,10 +165,12 @@ void SshClient::disconnectFromHost()
 
     if(m_channels.size() == 0)
     {
+        qDebug()<<"CLOSE!1!!";
         setSshState(DisconnectingSession);
     }
     else
     {
+        qDebug()<<"CLOSE!!2!";
         setSshState(DisconnectingChannel);
     }
 
@@ -560,19 +559,23 @@ void SshClient::_ssh_processEvent()
 
         case SshState::DisconnectingSession:
         {
+
             int ret = libssh2_session_disconnect_ex(m_session, SSH_DISCONNECT_BY_APPLICATION, "good bye!", "");
             if(ret == LIBSSH2_ERROR_EAGAIN)
             {
+
                 return;
             }
             if(m_socket.state() == QAbstractSocket::ConnectedState)
             {
+                    qDebug()<<"CLOSE!1SES!!";
                 qCDebug(sshclient) << m_name << ": Ask for main socket disconnection";
                 m_socket.disconnectFromHost();
                 return;
             }
             else
             {
+
                 qCDebug(sshclient) << m_name << ": Socket state is " << m_socket.state();
                 if(m_socket.state() == QAbstractSocket::UnconnectedState)
                 {
