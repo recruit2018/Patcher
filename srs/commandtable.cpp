@@ -63,7 +63,7 @@ void CommandTable::createRow(Device* dev)
 
     auto item = new QTableWidgetItem(tr("unknown"));
     setItem(pos,CommandTable::Status, item);
-    setItem(pos,CommandTable::Stage,new QTableWidgetItem(tr("file transfer ->")));
+    setItem(pos,CommandTable::Stage,new QTableWidgetItem(tr("wait for start")));
 
     QPushButton * but_save_set = new QPushButton("Save settings",this);
     QPushButton * but_create_set = new QPushButton("Create settings",this);
@@ -275,6 +275,7 @@ void CommandTable::startPatching()
         for(int j= 0; j < command.count();j++)
         {
             m_proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
+            item(i,Columns::Stage)->setText(QString("Exec: command %1").arg(j));
 #ifdef TASKS
             if(j == 0)
             {
@@ -332,6 +333,7 @@ void CommandTable::startPatching()
                 m_sftp = m_client.getChannel<SshSFtp>("ftp");
                 cmd = new SshSftpCommandSend(dev->get_sftp_local_path(),dev->get_sftp_remote_path(),*m_sftp);
                 m_sftp->processCmd(cmd);
+                continue;
             }
 
             QEventLoop waitproc;

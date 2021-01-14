@@ -41,9 +41,9 @@ public:
         User,
         DeviceName,
         Password,
-        Port,
-        Stage,
+        Port,       
         Status,
+        Stage,
         butCRTSettings,
         butSVSettings
     };

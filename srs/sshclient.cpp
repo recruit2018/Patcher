@@ -165,12 +165,10 @@ void SshClient::disconnectFromHost()
 
     if(m_channels.size() == 0)
     {
-        qDebug()<<"CLOSE!1!!";
         setSshState(DisconnectingSession);
     }
     else
     {
-        qDebug()<<"CLOSE!!2!";
         setSshState(DisconnectingChannel);
     }
 
@@ -568,7 +566,6 @@ void SshClient::_ssh_processEvent()
             }
             if(m_socket.state() == QAbstractSocket::ConnectedState)
             {
-                    qDebug()<<"CLOSE!1SES!!";
                 qCDebug(sshclient) << m_name << ": Ask for main socket disconnection";
                 m_socket.disconnectFromHost();
                 return;

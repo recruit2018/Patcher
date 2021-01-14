@@ -17,6 +17,12 @@ if(SPECIAL_TASKS)
     add_definitions(-DTASKS)
 endif()
 
+option(DEBUG_INFO "Display debug info" ON)
+
+if(DEBUG_INFO)
+    add_definitions(-DDEBUG)
+endif()
+
 set(SOURSE_DIR ./srs)
 set(HEADERS_DIR ./include)
 

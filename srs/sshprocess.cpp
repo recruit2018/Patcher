@@ -123,7 +123,12 @@ void SshProcess::sshDataReceived()
                 sshDataReceived();
                 return;
             }
-            qDebug()<<"We read: "<<buffer;
+#ifdef DEBUG
+            fprintf(stderr, "We read:\n");
+            for(int i = 0; i < retsz; ++i)
+                fputc(buffer[i], stderr);
+            fprintf(stderr, "\n");
+#endif
             m_result.append(buffer, static_cast<int>(retsz));
 
             if (libssh2_channel_eof(m_sshChannel) == 1)
