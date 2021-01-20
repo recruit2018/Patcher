@@ -35,6 +35,8 @@ private:
     DeviceIcmp* m_deviceIcmp;
     QTimer* m_timerStatus;
 
+    DeviceIcmp* getIcmpHandler();
+
 public:
     enum Columns {
         Address,

@@ -1,11 +1,13 @@
 #include "commandtable.h"
 
+
 CommandTable::CommandTable(QWidget * parent): QTableWidget(parent)
 {
     m_thread = new QThread(this);
-    m_deviceIcmp = new DeviceIcmp();
     m_timerStatus = new QTimer(this);
     m_settings = new QSettings(QDir::currentPath()+"/settings.ini", QSettings::IniFormat, this);
+
+    m_deviceIcmp = getIcmpHandler();
 
     connect(m_timerStatus,SIGNAL(timeout()),this,SLOT(polling()));
     connect(this, SIGNAL(itemChanged(QTableWidgetItem*)),this, SLOT(somethingChanged(QTableWidgetItem*)));
@@ -356,4 +358,16 @@ CommandTable::~CommandTable()
 {
     m_thread->quit();
     m_thread->wait();
+}
+
+DeviceIcmp *CommandTable::getIcmpHandler()
+{
+//The parent is not passed because in the future the object will be moved to the thread class
+#ifdef _WIN32
+   return m_deviceIcmp = new DeviceIcmpWin();
+#endif
+
+#ifdef __linux__
+   return m_deviceIcmp = new DeviceIcmpUnix();
+#endif
 }

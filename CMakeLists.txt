@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(Patcher VERSION 0.2.2 LANGUAGES CXX)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+project(Patcher VERSION 0.2.3 LANGUAGES CXX)
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -12,13 +12,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 option(SPECIAL_TASKS "Activates for special tasks" OFF)
-
 if(SPECIAL_TASKS)
     add_definitions(-DTASKS)
 endif()
 
 option(DEBUG_INFO "Display debug info" ON)
-
 if(DEBUG_INFO)
     add_definitions(-DDEBUG)
 endif()
