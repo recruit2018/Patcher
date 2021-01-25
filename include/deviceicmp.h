@@ -25,6 +25,8 @@
 #include <winsock2.h>
 #endif
 
+class Device;
+
 class DeviceIcmp : public QObject
 {
     Q_OBJECT
@@ -32,7 +34,7 @@ public:
     explicit DeviceIcmp(QObject *parent = nullptr);
 
   public slots:
-    virtual void getStatus(const QString&, int) = 0;
+    virtual void getStatus(const QString&, Device*) = 0;
 };
 
 
@@ -59,7 +61,7 @@ private:
     struct sockaddr  *m_sarecv;	/* sockaddr{} for receiving */
     size_t	    m_salen;		/* length of sockaddr{}s */
 
-    void readloop(int);
+    void readloop(Device*);
     unsigned short in_cksum(unsigned short *addr, int len);
     void send_v4(void);
     bool proc_v4(char *ptr, ssize_t len);
@@ -69,10 +71,10 @@ public:
     explicit DeviceIcmpUnix(QObject *parent = nullptr);
 
 public slots:
-    void getStatus(const QString&, int) override;
+    void getStatus(const QString&, Device*) override;
 
 signals:
-    void send_status(bool, int);
+    void send_status(bool, Device*);
 };
 #endif
 
@@ -90,10 +92,10 @@ public:
     LPVOID ReplyBuffer = NULL;
     DWORD ReplySize = 0;
 public slots:
-    void getStatus(const QString&, int) override;
+    void getStatus(const QString&, Device*) override;
 
 signals:
-    void send_status(bool,int);
+    void send_status(bool,Device*);
 };
 #endif
 

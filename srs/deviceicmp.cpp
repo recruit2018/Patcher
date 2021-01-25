@@ -54,7 +54,7 @@ unsigned short DeviceIcmpUnix::in_cksum(unsigned short *addr, int len)
 
 
 
-void DeviceIcmpUnix::readloop(int index)
+void DeviceIcmpUnix::readloop(Device* dev)
 {
     int				size;
     char			recvbuf[BUFSIZE];
@@ -83,7 +83,7 @@ void DeviceIcmpUnix::readloop(int index)
         if (res == 0)
         {
             qDebug()<<"TIMEOUT!!!";
-            send_status(false, index);
+            send_status(false, dev);
             break;
         }
         if(FD_ISSET(m_sockfd,&m_rset))
@@ -104,7 +104,7 @@ void DeviceIcmpUnix::readloop(int index)
 
         if(proc_v4(recvbuf, n))
         {
-            send_status(true, index);
+            send_status(true, dev);
             break;
         }
     }
@@ -135,7 +135,7 @@ void DeviceIcmpUnix::send_v4()
 
 
 
-void DeviceIcmpUnix::getStatus(const QString & host, int index)
+void DeviceIcmpUnix::getStatus(const QString & host, Device* dev)
 {
     m_pid = getpid();
     m_ai = host_serv(host.toStdString().c_str(), NULL, 0, 0);
@@ -144,7 +144,7 @@ void DeviceIcmpUnix::getStatus(const QString & host, int index)
     m_sarecv = static_cast<sockaddr*>(calloc(1, m_ai->ai_addrlen));
     m_salen = m_ai->ai_addrlen;
 
-    readloop(index);
+    readloop(dev);
 
     freeaddrinfo(m_ai);
     close(m_sockfd);
@@ -195,7 +195,7 @@ DeviceIcmpWin::DeviceIcmpWin(QObject* parent) : DeviceIcmp(parent)
 }
 
 
-void DeviceIcmpWin::getStatus(const QString& str, int index)
+void DeviceIcmpWin::getStatus(const QString& str, Device* dev)
 {    
     ipaddr = inet_addr(str.toStdString().c_str());
     hIcmpFile = IcmpCreateFile();
@@ -210,11 +210,11 @@ void DeviceIcmpWin::getStatus(const QString& str, int index)
 
     if (dwRetVal != 0)
     {
-        emit send_status(true,index);
+        emit send_status(true,dev);
     }
     else
     {
-        emit send_status(false,index);
+        emit send_status(false,dev);
     }
 
     IcmpCloseHandle(hIcmpFile);

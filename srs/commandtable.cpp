@@ -11,8 +11,8 @@ CommandTable::CommandTable(QWidget * parent): QTableWidget(parent)
 
     connect(m_timerStatus,SIGNAL(timeout()),this,SLOT(polling()));
     connect(this, SIGNAL(itemChanged(QTableWidgetItem*)),this, SLOT(somethingChanged(QTableWidgetItem*)));
-    connect(this,SIGNAL(ask_status(const QString&, int)),m_deviceIcmp,SLOT(getStatus(const QString&, int)));
-    connect(m_deviceIcmp,SIGNAL(send_status(bool, int)), this, SLOT(setStatus(bool, int)));
+    connect(this,SIGNAL(ask_status(const QString&, Device*)),m_deviceIcmp,SLOT(getStatus(const QString&, Device*)));
+    connect(m_deviceIcmp,SIGNAL(send_status(bool, Device*)), this, SLOT(setStatus(bool, Device*)));
 
     m_deviceIcmp->moveToThread(m_thread);
     m_timerStatus->start(2000);
@@ -37,21 +37,42 @@ void CommandTable::somethingChanged(QTableWidgetItem* item)
     };
 }
 
-void CommandTable::setStatus(bool val, int index)
+void CommandTable::setStatus(bool val, Device* dev)
 {
-    QTableWidgetItem* it;
-    it=item(index,Columns::Status);
-
-    if(val){
-        it->setText("online");
-        it->setForeground(Qt::green);
-    }
-    else
+    int pos;
+  m_mutex.lock();
+    if((pos= m_device_list.indexOf(dev)) != -1)
     {
-        it->setForeground(Qt::red);
-        it->setText("offline");
+        if(val)
+        {
+            item(pos, Columns::Status)->setText("online");
+            item(pos, Columns::Status)->setForeground(Qt::green);
+        }
+        else
+        {
+            item(pos, Columns::Status)->setForeground(Qt::red);
+            item(pos, Columns::Status)->setText("offline");
+        }
+    }
+    m_mutex.unlock();
+}
+
+
+//Bad slot. Temporary implementation
+void CommandTable::polling()
+{
+    Device* dev;
+
+    if (m_device_list.isEmpty())
+        return;
+    for(int i=0;i<m_device_list.count();i++)
+    {
+        dev = m_device_list.at(i);
+        emit ask_status(dev->get_host(), dev);
     }
 }
+
+
 
 void CommandTable::createRow(Device* dev)
 {
@@ -187,6 +208,8 @@ void CommandTable::loadSettings()
 
 void CommandTable::delCurRow()
 {
+    m_mutex.lock();
+
     auto pos = currentRow();
     removeRow(pos);
     m_device_list.removeAt(pos);
@@ -197,6 +220,8 @@ void CommandTable::delCurRow()
     {
         i->printself();
     }
+
+    m_mutex.unlock();
 }
 
 void CommandTable::getDeviceList()
@@ -221,26 +246,10 @@ void CommandTable::recive_command(const QString& command)
         dev->set_sftp_local_path(path.at(1));
         dev->set_sftp_remote_path(path.at(2));
     }
-    //    else
-    //    {
-    //        dev->set_sftp_local_path("");
-    //        dev->set_sftp_remote_path("");
-    //    }
 
     dev->set_command_list(list);
 }
-//Bad slot. Temporary implementation
-void CommandTable::polling()
-{
-    Device* dev;
-    if (m_device_list.isEmpty())
-        return;
-    for(int i=0;i<m_device_list.count();i++)
-    {
-        dev = m_device_list.at(i);
-        emit ask_status(dev->get_host(),i);
-    }
-}
+
 
 void CommandTable::startPatching()
 {

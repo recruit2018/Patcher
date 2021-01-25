@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QThread>
+#include <QMutex>
 #include "device.h"
 #include "sshclient.h"
 #include "commandwind.h"
@@ -34,6 +35,7 @@ private:
     QThread* m_thread;
     DeviceIcmp* m_deviceIcmp;
     QTimer* m_timerStatus;
+    QMutex m_mutex;
 
     DeviceIcmp* getIcmpHandler();
 
@@ -66,7 +68,7 @@ private slots:
     void recive_command(const QString&);
     void polling();
     void somethingChanged(QTableWidgetItem*);
-    void setStatus(bool,int);
+    void setStatus(bool,Device*);
 
 public slots:
     void create_device_settings();
@@ -75,7 +77,7 @@ public slots:
 
 signals:
     void get_command(QString&);
-    void ask_status(const QString&,int);
+    void ask_status(const QString&,Device*);
 };
 
 
