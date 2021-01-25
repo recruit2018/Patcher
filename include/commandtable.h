@@ -65,7 +65,7 @@ public:
     virtual ~CommandTable();
 
 private slots:
-    void recive_command(const QString&);
+    void recive_command(const QStringList&);
     void polling();
     void somethingChanged(QTableWidgetItem*);
     void setStatus(bool,Device*);
@@ -76,7 +76,7 @@ public slots:
     void save_device_settings();
 
 signals:
-    void get_command(QString&);
+    void get_command(const QStringList&);
     void ask_status(const QString&,Device*);
 };
 

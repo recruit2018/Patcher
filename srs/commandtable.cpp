@@ -105,8 +105,8 @@ void CommandTable::create_device_settings()
     CommandWind* wind = new CommandWind(this);
 
     wind->setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(wind,SIGNAL(send_command(const QString&)),this,SLOT(recive_command(const QString&)));
-    connect(this,SIGNAL(get_command(QString&)),wind,SLOT(data_recived(QString&)));
+    connect(wind,SIGNAL(send_command(const QStringList&)),this,SLOT(recive_command(const QStringList&)));
+    connect(this,SIGNAL(get_command(const QStringList&)),wind,SLOT(data_recived(const QStringList&)));
     wind->show();
 
     auto pos = currentRow();
@@ -114,8 +114,8 @@ void CommandTable::create_device_settings()
 
     if(dev != nullptr)
     {
-        cmd = dev->get_command_list().join("\n");
-        emit get_command(cmd);
+        //cmd = dev->get_command_list().join("\n");
+        emit get_command(dev->get_command_list());
     }
 }
 
@@ -229,12 +229,12 @@ void CommandTable::getDeviceList()
 
 }
 
-void CommandTable::recive_command(const QString& command)
+void CommandTable::recive_command(const QStringList &command)
 {
     Device* dev;
     auto pos = currentRow();
     int index=0;
-    QStringList list = command.split("\n");
+    QStringList list = command;
     QStringList path;
 
     dev = m_device_list.at(pos);
