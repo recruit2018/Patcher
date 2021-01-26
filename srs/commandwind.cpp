@@ -24,7 +24,6 @@ CommandWind::~CommandWind()
 
 
 
-
 void CommandWind::data_recived(const QStringList &command)
 {
    for(auto i:command)
@@ -51,7 +50,6 @@ void CommandWind::on_pushButton_3_clicked()
         commands.append(ui->listWidget->item(i)->text());
     }
 
-    Patcher::printlist(commands);
     commands.removeAll({});
     emit send_command(commands);
     close();

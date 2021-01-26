@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QDialog>
-#include <patcherfunc.h>
 #include <QStringList>
 
 namespace Ui {
@@ -12,8 +11,8 @@ class CommandWind : public QDialog
 {
     Q_OBJECT
 
-
     void addRow(const QString &);
+
 public:
     explicit CommandWind(QWidget *parent = nullptr);
     ~CommandWind();

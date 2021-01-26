@@ -40,7 +40,7 @@ void CommandTable::somethingChanged(QTableWidgetItem* item)
 void CommandTable::setStatus(bool val, Device* dev)
 {
     int pos;
-  m_mutex.lock();
+    m_mutex.lock();
     if((pos= m_device_list.indexOf(dev)) != -1)
     {
         if(val)
@@ -114,7 +114,6 @@ void CommandTable::create_device_settings()
 
     if(dev != nullptr)
     {
-        //cmd = dev->get_command_list().join("\n");
         emit get_command(dev->get_command_list());
     }
 }
@@ -171,6 +170,7 @@ void CommandTable::loadSettings()
 {
     m_device_list.clear();
     Device* device;
+
     m_settings->beginGroup("Devices");
     QStringList childlist = m_settings->childGroups();
     for(int i = 0;i < childlist.size();i++)
@@ -200,10 +200,11 @@ void CommandTable::loadSettings()
         m_settings->endGroup();
         m_settings->endGroup();
         createRow(device);
+        device->printself();
     }
 
     m_settings->endGroup();
-    device->printself();
+
 }
 
 void CommandTable::delCurRow()
@@ -246,7 +247,6 @@ void CommandTable::recive_command(const QStringList &command)
         dev->set_sftp_local_path(path.at(1));
         dev->set_sftp_remote_path(path.at(2));
     }
-
     dev->set_command_list(list);
 }
 
@@ -359,7 +359,6 @@ void CommandTable::startPatching()
         QObject::connect(&m_client, &SshClient::sshDisconnected, &waitcli, &QEventLoop::quit);
         QObject::connect(&m_client, &SshClient::sshError, &waitcli, &QEventLoop::quit);
         waitcli.exec();
-
     }
 }
 
@@ -371,12 +370,12 @@ CommandTable::~CommandTable()
 
 DeviceIcmp *CommandTable::getIcmpHandler()
 {
-//The parent is not passed because in the future the object will be moved to the thread class
+    //The parent is not passed because in the future the object will be moved to the thread class
 #ifdef _WIN32
-   return m_deviceIcmp = new DeviceIcmpWin();
+    return m_deviceIcmp = new DeviceIcmpWin();
 #endif
 
 #ifdef __linux__
-   return m_deviceIcmp = new DeviceIcmpUnix();
+    return m_deviceIcmp = new DeviceIcmpUnix();
 #endif
 }
