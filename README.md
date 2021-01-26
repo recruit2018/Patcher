@@ -1,12 +1,12 @@
 # Patcher
 
-###To successfully launch the project, you must complete the following steps:
+### To successfully launch the project, you must complete the following steps:
 ```sh
 $ git clone project: https://github.com/recruit2018/ProjectPatcher.git
 $ git submodule init 
 $ git submodule update
 ```
-###Install libraries: libssh2
+### Install libraries: libssh2
 
 To install libssh2, build libssh2 with one of the crypto libraries: OpenSSL, Libgcrypt, WinCNG, mbedTLS
 
