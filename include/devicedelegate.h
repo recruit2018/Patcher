@@ -1,13 +1,13 @@
 #ifndef DEVICEDELEGATE_H
 #define DEVICEDELEGATE_H
 
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 #include <QObject>
 #include <QPushButton>
 #include <QString>
 #include <QPainter>
 
-class DeviceDelegate : public QItemDelegate
+class DeviceDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:

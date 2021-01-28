@@ -42,8 +42,6 @@ public:
     inline QStringList get_command_list() const { return m_shellcommand; }
     inline QString get_sftp_local_path() const { return m_localfilepath; }
     inline QString get_sftp_remote_path() const { return m_destfilepath; }
-    QString getvalue(const int&) const;
-    void setvalue(const QString &, const int& column);
     void printself() const;
 
 signals:

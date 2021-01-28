@@ -1,6 +1,6 @@
 #include "devicedelegate.h"
 
-DeviceDelegate::DeviceDelegate(QWidget* parent): QItemDelegate(parent)
+DeviceDelegate::DeviceDelegate(QWidget* parent): QStyledItemDelegate(parent)
 {
 
 }
@@ -17,7 +17,7 @@ QWidget *DeviceDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
     }
     else
    {
-        return QItemDelegate::createEditor(parent,option,index);
+        return QStyledItemDelegate::createEditor(parent,option,index);
 
 
     }
@@ -32,12 +32,12 @@ void DeviceDelegate::setEditorData(QWidget * editor, const QModelIndex & index) 
 
   //  }
    // else
-        QItemDelegate::setEditorData(editor,index);
+       QStyledItemDelegate::setEditorData(editor,index);
 }
 
 void DeviceDelegate::setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const
 {
-        QItemDelegate::setModelData(editor,model,index);
+        QStyledItemDelegate::setModelData(editor,model,index);
 }
 
 void DeviceDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -56,7 +56,7 @@ void DeviceDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option
 
     }
     else
-        QItemDelegate::paint(painter,option,index);
+        QStyledItemDelegate::paint(painter,option,index);
 
 
 
