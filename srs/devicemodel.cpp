@@ -6,13 +6,15 @@ DeviceModel::DeviceModel(QObject * parent)
     setHeaders();
 }
 
-int DeviceModel::rowCount(const QModelIndex&parent) const
+int DeviceModel::rowCount(const QModelIndex& parent) const
 {
+    Q_UNUSED(parent);
     return m_device_list.count();
 }
 
-int DeviceModel::columnCount(const QModelIndex&parent) const
+int DeviceModel::columnCount(const QModelIndex& parent) const
 {
+    Q_UNUSED(parent);
     return m_headers.count();
 }
 
@@ -24,7 +26,7 @@ QVariant DeviceModel::data(const QModelIndex& index, int role) const
     }
 
     if(role == Qt::TextAlignmentRole)
-        return int(Qt::AlignLeft | Qt::AlignCenter);
+        return int(Qt::AlignLeft | Qt::AlignVCenter);
     else if(role == Qt::DisplayRole || role == Qt::EditRole)
     {
         Device* dev;
