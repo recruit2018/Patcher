@@ -22,27 +22,28 @@ int DeviceModel::columnCount(const QModelIndex& parent) const
 
 QVariant DeviceModel::data(const QModelIndex& index, int role) const
 {
-    if(!index.isValid())
-    {
-        return QVariant();
-    }
+    if (!index.isValid() ||
+    index.row() < 0 || index.row() >= m_device_list.count() ||
+    index.column() < 0 || index.column() >= 9)
+    return QVariant();
 
     if(role == Qt::TextAlignmentRole)
         return int(Qt::AlignLeft | Qt::AlignVCenter);
-    else if(role == Qt::DisplayRole || role == Qt::EditRole)
+
+    if(role == Qt::DisplayRole || role == Qt::EditRole)
     {
         Device* dev;
         dev = m_device_list.at(index.row());
         switch (index.column())
         {
-        case Columns::Address: {return dev->get_host(); break;}
-        case Columns::User: {return dev->get_user();  break;}
-        case Columns::DeviceName: {return dev->get_device_name(); break;}
-        case Columns::Port: {return QString::number(dev->get_port()); break;}
-        case Columns::Status: {return dev->get_status(); break;}
-        case Columns::Stage: {return dev->get_stage(); break;}
-        }
-        return QString("");
+        case Address: {return dev->get_host(); break;}
+        case User: {return dev->get_user();  break;}
+        case DeviceName: {return dev->get_device_name(); break;}
+        case Port: {return QString::number(dev->get_port()); break;}
+        case Status: {return dev->get_status(); break;}
+        case Stage: {return dev->get_stage(); break;}
+        //default: Q_ASSERT(false); !!!!!!!
+        }        
     }
     else
         return QVariant();
@@ -51,86 +52,82 @@ QVariant DeviceModel::data(const QModelIndex& index, int role) const
 
 bool DeviceModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if(role == Qt::EditRole)
-    {
+    if (!index.isValid() || role != Qt::EditRole ||
+    index.row() < 0 || index.row() >= m_device_list.count() ||
+    index.column() < 0 || index.column() >= 9)
+    return false;
 
         Device* dev;
         dev = m_device_list.at(index.row());
         switch (index.column())
         {
-        case Columns::Address: {dev->set_addr(value.toString()); break;}
-        case Columns::User: {dev->set_user(value.toString());  break;}
-        case Columns::DeviceName: {dev->set_device_name(value.toString()); break;}
-        case Columns::Port: {dev->set_port(value.toUInt()); break;}
-        case Columns::Status: {dev->set_status(value.toString()); break;}
-        case Columns::Stage: {dev->set_stage(value.toString()); break;}
+        case Address: {dev->set_addr(value.toString()); break;}
+        case User: {dev->set_user(value.toString());  break;}
+        case DeviceName: {dev->set_device_name(value.toString()); break;}
+        case Port: {dev->set_port(value.toUInt()); break;}
+        case Status: {dev->set_status(value.toString()); break;}
+        case Stage: {dev->set_stage(value.toString()); break;}
+        default: Q_ASSERT(false);
         };
-        QModelIndex item = createIndex(index.row(),index.column());
+
         emit dataChanged(index, index);
-        emit dataChanged(item, item);
+
         return true;
-    }
-    return false;
 }
 
 Qt::ItemFlags DeviceModel::flags(const QModelIndex& index) const
 {
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
-    flags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+    flags |= Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
     return flags;
 }
 
 QVariant DeviceModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
+{   
+    if(role != Qt::DisplayRole)
+        return QVariant();
+
+    if (orientation == Qt::Horizontal)
     {
         switch (section)
         {
-        case Columns::Address: {return QString(tr("Ip Address"));}
-        case Columns::User: { return QString(tr("User"));}
-        case Columns::DeviceName: {return QString(tr("Device name"));}
-        case Columns::Password: {return QString(tr("Password"));}
-        case Columns::Port: {return QString(tr("Port"));}
-        case Columns::Status: {return QString(tr("Status"));}
-        case Columns::Stage: {return QString(tr("Stage"));}
-        case Columns::butCRTSettings: {return QString(tr("Create setting"));}
-        case Columns::butSVSettings: {return QString(tr("Save setting"));}
+        case Columns::Address: return tr("Ip Address");
+        case Columns::User: return tr("User");
+        case Columns::DeviceName: return tr("Device name");
+        case Columns::Password: return tr("Password");
+        case Columns::Port: return tr("Port");
+        case Columns::Status: return tr("Status");
+        case Columns::Stage: return tr("Stage");
+        case Columns::butCRTSettings: return tr("Create setting");
+        case Columns::butSVSettings: return tr("Save setting");
+        default: Q_ASSERT(false);
         }
-
     }
-
-    return QVariant();
-
+    return section + 1;
 }
 
 
-bool DeviceModel::insertRows(int position, int rows, const QModelIndex &index)
+bool DeviceModel::insertRows(int row, int count, const QModelIndex&)
 {
-    Q_UNUSED(index);
-    beginInsertRows(QModelIndex(),position,position+rows-1);
-    Device* dev =new Device(this);
+    beginInsertRows(QModelIndex(), row ,row+count-1);
 
-    for (int row = 0; row < rows; ++row)
+    for (int i = 0; i < count; ++i)
     {
-        m_device_list.append(dev);
+        m_device_list.insert(row, new Device(this));
     }
-
     endInsertRows();
-
     return true;
 }
 
-bool DeviceModel::removeRows(int position, int rows, const QModelIndex &parent)
+bool DeviceModel::removeRows(int row, int count, const QModelIndex&)
 {    
-    beginRemoveRows(QModelIndex(), position, position+rows-1);
+    beginRemoveRows(QModelIndex(), row, row+count-1);
 
-    for (int row = 0; row < rows; ++row)
+    for (int i = 0; i < count; ++i)
     {
-        if(!m_device_list.isEmpty())
-            m_device_list.removeLast();
+        m_device_list.removeAt(row);
     }
-
     endRemoveRows();
     return true;
 }
