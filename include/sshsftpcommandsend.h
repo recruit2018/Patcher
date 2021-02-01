@@ -7,7 +7,7 @@
 
 class SshSFtp;
 
-#define SshSftpCommandSend_BUFFER_SIZE 1024*100
+#define SshSftpCommandSend_BUFFER_SIZE 4096
 
 class SshSftpCommandSend: public SshSftpCommand
 {
@@ -26,5 +26,4 @@ public:
     SshSftpCommandSend(const QString &source, QString dest, SshSFtp &parent);
     void process() override;
 };
-
 

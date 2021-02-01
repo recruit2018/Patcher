@@ -5,17 +5,8 @@
 #include <QTcpSocket>
 #include <QTimer>
 #include <QMutex>
-#include <sys/types.h>
 #include "sshchannel.h"
 #include "sshkey.h"
-
-#ifdef _WIN64
-#include <winsock2.h>
-#endif
-#ifdef __linux__
-#include <sys/socket.h>
-#endif
-
 
 #ifndef FALLTHROUGH
 #if __has_cpp_attribute(fallthrough)
@@ -29,9 +20,8 @@
 
 Q_DECLARE_LOGGING_CATEGORY(sshclient)
 
+class SshScpSend;
 class SshSFtp;
-
-const int ConnectionTimeout = 60000;
 
 
 class  SshClient : public QObject {
@@ -50,12 +40,11 @@ public:
         DisconnectingChannel,
         DisconnectingSession,
         FreeSession,
-        Error
+        Error,
     };
     Q_ENUM(SshState)
 
 private:
-    friend class SshProcess;
     static int s_nbInstance;
     LIBSSH2_SESSION    * m_session {nullptr};
     LIBSSH2_KNOWNHOSTS * m_knownHosts {nullptr};
@@ -90,6 +79,8 @@ public:
     bool takeChannelCreationMutex(void *identifier);
     void releaseChannelCreationMutex(void *identifier);
 
+
+
 public slots:
     int connectToHost(const QString & username, const QString & hostname, quint16 port = 22, QByteArrayList methodes = QByteArrayList());
     bool waitForState(SshClient::SshState state);
@@ -107,9 +98,7 @@ public:
                 T *proc = qobject_cast<T*>(ch);
                 if(proc)
                 {
-
                     return proc;
-
                 }
             }
         }
@@ -137,18 +126,20 @@ private slots:
     void _sendKeepAlive();
 
 
-public:
+public: /* New function implementation with state machine */
     SshState sshState() const;
 
     void setName(const QString &name);
 
-private:
+    void setProxy(QNetworkProxy *proxy);
+
+private: /* New function implementation with state machine */
     SshState m_sshState {SshState::Unconnected};
     QByteArrayList m_authenticationMethodes;
     void setSshState(const SshState &sshState);
 
 
-private slots:
+private slots: /* New function implementation with state machine */
     void _connection_socketTimeout();
     void _connection_socketError();
     void _connection_socketConnected();
@@ -165,6 +156,7 @@ signals:
     void sshDataReceived();
     void sshEvent();
     void channelsChanged(int);
+    void disconected();
 };
 
 inline const char* sshErrorToString(int err)

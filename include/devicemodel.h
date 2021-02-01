@@ -20,8 +20,6 @@ class DeviceModel : public QAbstractTableModel
     Q_OBJECT
 private:
     QList<Device*> m_device_list;
-    QSettings* m_settings;
-    QStringList m_headers;
 public:        
     enum Columns
     {
@@ -30,8 +28,8 @@ public:
         DeviceName,
         Password,
         Port,
-        Stage,
         Status,
+        Stage,
         butCRTSettings,
         butSVSettings
     };
@@ -46,12 +44,12 @@ public:
     bool setData(const QModelIndex&, const QVariant &value, int role) override;
     Qt::ItemFlags flags(const QModelIndex&) const override;
     QVariant headerData(int, Qt::Orientation, int) const override;
-    void setHeaders();
     bool insertRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
-    bool removeRows(int position, int rows, const QModelIndex &index = QModelIndex()) override;
+    bool removeRows(int position, int rows, const QModelIndex &parent = QModelIndex()) override;
 
-    void setRowCount(int count) {m_device_list.clear();}
     void createRow(Device* dev);
+    Device* getDevice(int);
+    int deviceExist(Device*dev);
 };
 
 

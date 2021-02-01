@@ -5,15 +5,19 @@
 #include <QFileDialog>
 #include <QList>
 #include <QMessageBox>
+#include <QTimer>
+#include <QThread>
 #include "device.h"
+#include "deviceicmp.h"
+#include "patcherfunc.h"
+#include "commandwind.h"
+#include "devicemodel.h"
+#include "devicedelegate.h"
 #include "sshclient.h"
 #include "sshprocess.h"
 #include "sshsftp.h"
 #include "sshsftpcommandsend.h"
-#include "patcherfunc.h"
-#include "commandwind.h"
-#include "devicemodel.h"
-#include <QSettings>
+#include "devicedelegate.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,23 +27,27 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    SshClient m_client;
-    SshProcess *m_proc;
-    SshSFtp *m_sftp;
-    QStringList m_shellcommand;
-    QTranslator m_tranclator;
-    QString m_localfilepath;
-    QString m_destfilepath;
-    QList<Device*> m_device_list;
     DeviceModel* m_model;
+    QTranslator m_tranclator;
+
+    SshClient m_client;
+    SshProcess* m_proc;
+    SshSFtp* m_sftp;
+    QThread* m_thread;
+    DeviceIcmp* m_deviceIcmp;
+    QTimer* m_timerStatus;
+    QMutex m_mutex;
     QSettings* m_settings;
+    DeviceIcmp* getIcmpHandler();
+
+    void startPatching(); //возвращать кол-во пропатченных устройств
+
 protected:
     void changeEvent(QEvent* event) override;
 public:
+    void createRow(Device* dev);
     MainWindow(QWidget *parent = nullptr);
     virtual ~MainWindow();
-    void saveSettings();
-    void loadSettings();
 
 
 
@@ -54,21 +62,28 @@ private slots:
 
     void save_setting_device();
 
-    void create_setting_device();
+    void create_device_settings();
 
     void on_actionLoad_settings_triggered();
 
     void on_actionSave_sattings_triggered();
 
     void on_but_del_device_clicked();
-    void create_device_settings();
 
+    void setStatus(bool, Device*);
 
-    void recive_command(const QString& command);
+    void loadSettings();
+
+    void saveSettings();
+
+        void recive_command(const QStringList&);
+        void polling();
+
 
 signals:
-    void get_command(QString&);
 
+        void get_command(const QStringList&);
+        void ask_status(const QString&,Device*);
 private:
     Ui::MainWindow *ui;
 };
