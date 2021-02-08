@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <QDebug>
+#include <QStringList>
 
 #ifdef __linux__
 #include	<netinet/in_systm.h>
@@ -91,6 +92,9 @@ public:
     char SendData[32];
     LPVOID ReplyBuffer = NULL;
     DWORD ReplySize = 0;
+    QStringList m_addresses;
+    ~DeviceIcmpWin();
+
 public slots:
     void getStatus(const QString&, Device*) override;
 

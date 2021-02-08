@@ -31,13 +31,13 @@ set(HEADERS ${HEADERS_DIR}/sshclient.h ${HEADERS_DIR}/sshchannel.h ${HEADERS_DIR
     ${HEADERS_DIR}/sshsftp.h ${HEADERS_DIR}/sshsftpcommandsend.h ${HEADERS_DIR}/sshsftpcommand.h
     ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/commandtable.h ${HEADERS_DIR}/mainwindow.h
     ${HEADERS_DIR}/device.h ${HEADERS_DIR}/commandwind.h ${HEADERS_DIR}/deviceicmp.h ${HEADERS_DIR}/devicemodel.h
-    ${HEADERS_DIR}/devicedelegate.h)
+    ${HEADERS_DIR}/devicedelegate.h ${HEADERS_DIR}/devicefiltermodel.h)
 
 set(SOURCES ${SOURSE_DIR}/main.cpp ${SOURSE_DIR}/sshclient.cpp ${SOURSE_DIR}/sshchannel.cpp ${SOURSE_DIR}/sshkey.cpp ${SOURSE_DIR}/sshprocess.cpp
     ${SOURSE_DIR}/sshsftp.cpp ${SOURSE_DIR}/sshsftpcommandsend.cpp ${SOURSE_DIR}/sshsftpcommand.cpp
     ${SOURSE_DIR}/patcherfunc.cpp ${SOURSE_DIR}/commandtable.cpp ${SOURSE_DIR}/mainwindow.cpp
     ${SOURSE_DIR}/device.cpp ${SOURSE_DIR}/commandwind.cpp ${SOURSE_DIR}/deviceicmp.cpp ${SOURSE_DIR}/devicemodel.cpp
-    ${SOURSE_DIR}/devicedelegate.cpp)
+    ${SOURSE_DIR}/devicedelegate.cpp ${SOURSE_DIR}/devicefiltermodel.cpp)
 
 find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)

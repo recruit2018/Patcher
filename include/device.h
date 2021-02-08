@@ -18,6 +18,8 @@ private:
     QString m_destfilepath;
     QString m_lineStatus{"unknown"};
     QString m_stage{"wait for start"};
+    QString m_pass;
+
 
 public:
 

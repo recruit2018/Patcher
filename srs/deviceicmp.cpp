@@ -194,6 +194,11 @@ DeviceIcmpWin::DeviceIcmpWin(QObject* parent) : DeviceIcmp(parent)
 {
 }
 
+DeviceIcmpWin::~DeviceIcmpWin()
+{
+    IcmpCloseHandle(hIcmpFile);
+}
+
 
 void DeviceIcmpWin::getStatus(const QString& str, Device* dev)
 {    
@@ -210,14 +215,13 @@ void DeviceIcmpWin::getStatus(const QString& str, Device* dev)
 
     if (dwRetVal != 0)
     {
-        emit send_status(true,dev);
+        emit send_status(true, dev);
     }
     else
     {
-        emit send_status(false,dev);
+        emit send_status(false, dev);
     }
 
-    IcmpCloseHandle(hIcmpFile);
     free(ReplyBuffer); // Освобождаем память
 }
 #endif

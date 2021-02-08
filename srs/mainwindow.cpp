@@ -13,18 +13,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_thread = new QThread(this);
     m_timerStatus = new QTimer(this);
-   //ui->tableView->setItemDelegate(new DeviceDelegate);
 
     m_deviceIcmp = getIcmpHandler();
 
-    connect(m_timerStatus,SIGNAL(timeout()),this,SLOT(polling()));
-   // connect(this, SIGNAL(itemChanged(QTableWidgetItem*)),this, SLOT(somethingChanged(QTableWidgetItem*)));
-    connect(this,SIGNAL(ask_status(const QString&, Device*)),m_deviceIcmp,SLOT(getStatus(const QString&, Device*)));
+    connect(m_timerStatus,&QTimer::timeout,this,&MainWindow::polling);
+    connect(this,&MainWindow::ask_status, m_deviceIcmp, &DeviceIcmp::getStatus);
     connect(m_deviceIcmp,SIGNAL(send_status(bool, Device*)), this, SLOT(setStatus(bool, Device*)));
 
     m_deviceIcmp->moveToThread(m_thread);
     m_timerStatus->start(2000);
     m_thread->start();
+
+    setWindowTitle(tr("Patcher"));
 }
 
 MainWindow::~MainWindow()
@@ -38,12 +38,11 @@ MainWindow::~MainWindow()
 void MainWindow::create_device_settings()
 {
     Device* dev;
-    QString cmd;
     CommandWind* wind = new CommandWind(this);
 
     wind->setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(wind,SIGNAL(send_command(const QStringList&)),this,SLOT(recive_command(const QStringList&)));
-    connect(this,SIGNAL(get_command(const QStringList&)),wind,SLOT(data_recived(const QStringList&)));
+    connect(wind, &CommandWind::send_command, this, &MainWindow::receive_command);
+    connect(this, &MainWindow::get_command, wind, &CommandWind::data_recived);
     wind->show();
 
     auto pos = ui->tableView->currentIndex().row();
@@ -58,7 +57,6 @@ void MainWindow::create_device_settings()
 
 void MainWindow::on_But_start_pach_clicked()
 {
-
     ui->But_add_device->setEnabled(false);
     ui->But_start_pach->setEnabled(false);
     ui->but_del_device->setEnabled(false);
@@ -68,36 +66,27 @@ void MainWindow::on_But_start_pach_clicked()
     ui->But_add_device->setEnabled(true);
     ui->But_start_pach->setEnabled(true);
     ui->but_del_device->setEnabled(true);
-
 }
 
 
 
 void MainWindow::save_setting_device()
 {
-
-
 }
 
 
 void MainWindow::on_But_add_device_clicked()
 {
-
-    int row = m_model->rowCount();
-    m_model->insertRows(row, 1);
-    // QModelIndex in = m_model->index(row, 1);
-    // ui->tableView->setCurrentIndex(in);
-    // ui->tableView->edit(in);
-    QPushButton * but_save_set = new QPushButton("Save settings",this);
-    QPushButton * but_create_set = new QPushButton("Create settings",this);
+    m_model->insertRows(m_model->rowCount(), 1);
+    QPushButton* but_save_set = new QPushButton("Save settings",this);
+    QPushButton* but_create_set = new QPushButton("Create settings",this);
     but_save_set->setEnabled(false);
-    //   connect(but_save_set,SIGNAL(clicked()),this, SLOT(save_device_settings()));
-    connect(but_create_set,SIGNAL(clicked()),this, SLOT(create_device_settings()));
 
+    connect(but_create_set, &QPushButton::clicked, this, &MainWindow::create_device_settings);
 
-    ui->tableView->setIndexWidget(m_model->index(m_model->rowCount()-1 ,7),but_create_set);
-    ui->tableView->setIndexWidget(m_model->index(m_model->rowCount()-1,8),but_save_set);
-
+    ui->tableView->setIndexWidget(m_model->index(m_model->rowCount() -1, DeviceModel::Columns::butCRTSettings), but_create_set);
+    ui->tableView->setIndexWidget(m_model->index(m_model->rowCount() -1, DeviceModel::Columns::butSVSettings), but_save_set);
+    ui->tableView->scrollToBottom();
 
     if(m_model->rowCount() > 0)
     {
@@ -150,15 +139,17 @@ void MainWindow::createRow(Device* dev)
     connect(but_create_set,SIGNAL(clicked()),this, SLOT(create_device_settings()));
 
 
-    ui->tableView->setIndexWidget(m_model->index(m_model->rowCount()-1 ,7),but_create_set);
-    ui->tableView->setIndexWidget(m_model->index(m_model->rowCount()-1,8),but_save_set);
+    ui->tableView->setIndexWidget(m_model->index(m_model->rowCount()-1, DeviceModel::Columns::butCRTSettings),but_create_set);
+    ui->tableView->setIndexWidget(m_model->index(m_model->rowCount()-1, DeviceModel::Columns::butSVSettings),but_save_set);
 
     if(m_model->rowCount() > 0)
     {
         ui->but_del_device->setEnabled(true);
         ui->But_start_pach->setEnabled(true);
     }
+
     ui->tableView->update();
+    ui->tableView->scrollToBottom();
 }
 
 void MainWindow::on_actionEnglish_triggered()
@@ -169,15 +160,13 @@ void MainWindow::on_actionEnglish_triggered()
 
 void MainWindow::on_actionLoad_settings_triggered()
 {
-    int ret = QMessageBox::warning(this, tr("Patcher"),
+    auto ret = QMessageBox::warning(this, tr("Patcher"),
                                    tr("When downloading, all unsaved data will be lost.\n"
                                       "Do you really want to continue?"),
                                    QMessageBox::Ok | QMessageBox::Cancel);
     if(ret == QMessageBox::Ok)
     {
 
-        //ui->commandtableWidget->setRowCount(0); !!!!!!!!
-       // m_model->removeRows(0, m_model->rowCount());
         loadSettings();
     }
     else
@@ -192,7 +181,7 @@ void MainWindow::on_actionLoad_settings_triggered()
 
 void MainWindow::on_actionSave_sattings_triggered()
 {
-    int ret = QMessageBox::warning(this, tr("Patcher"),
+    auto ret = QMessageBox::warning(this, tr("Patcher"),
                                    tr("When saving, the previous settings will be permanently changed.\n"
                                       "Do you really want to continue?"),
                                    QMessageBox::Ok | QMessageBox::Cancel);
@@ -206,14 +195,13 @@ void MainWindow::on_actionSave_sattings_triggered()
 
 void MainWindow::on_but_del_device_clicked()
 {
-    if(!ui->tableView->currentIndex().isValid())
-    {
+    if(!ui->tableView->currentIndex().isValid())    
         return;
-    }
 
-    m_mutex.lock();
+    const bool wasBlocked = m_deviceIcmp->blockSignals(true); //Allows to discard the mutex
     m_model->removeRows(ui->tableView->currentIndex().row(), 1, ui->tableView->currentIndex());
-    m_mutex.unlock();
+    m_deviceIcmp->blockSignals(wasBlocked);
+
     if(m_model->rowCount() == 0)
     {
         ui->but_del_device->setEnabled(false);
@@ -225,17 +213,13 @@ void MainWindow::setStatus(bool val, Device* dev)
 {
     QModelIndex index;
     int pos = m_model->deviceExist(dev);
-    m_mutex.lock();
+
     if(pos != -1)
     {
         if(val)
         {
             index = m_model->index(pos, DeviceModel::Columns::Status, QModelIndex());
             m_model->setData(index,"online",Qt::EditRole);
-           // dev->set_status("online");
-
-            //item(pos, DeviceModel::Columns::Status)->setText("online");
-            //item(pos, DeviceModel::Columns::Status)->setForeground(Qt::green);
         }
         else
         {
@@ -243,19 +227,16 @@ void MainWindow::setStatus(bool val, Device* dev)
             m_model->setData(index,"offline",Qt::EditRole);
         }
     }
-    m_mutex.unlock();
+
 }
 
 void MainWindow::loadSettings()
-{
-    qDebug()<<"БЫЛО"<<m_model->rowCount();
-    m_model->removeRows(0, m_model->rowCount());
-    qDebug()<<"fdsfdsfsd"<<m_model->rowCount();
-    //m_model->clearDeviceList();
+{   
     Device* device;
-
+    m_model->removeRows(0, m_model->rowCount());
     m_settings->beginGroup("Devices");
     QStringList childlist = m_settings->childGroups();
+
     for(int i = 0;i < childlist.size();i++)
     {
         device = new Device(this);
@@ -291,11 +272,11 @@ void MainWindow::loadSettings()
 
 void MainWindow::saveSettings()
 {
-    m_settings->clear();
-    m_settings->beginGroup("Devices");
     Device* dev;
     QStringList list;
-    int res=0;
+
+    m_settings->clear();
+    m_settings->beginGroup("Devices");
     for(int i =0;i<m_model->rowCount();i++)
     {
         dev = m_model->getDevice(i);
@@ -309,7 +290,7 @@ void MainWindow::saveSettings()
         list = dev->get_command_list();
         for(int j=0; j<list.size();j++)
         {
-            res = list.at(j).indexOf(QRegExp("^sftp .+"));
+            auto res = list.at(j).indexOf(QRegExp("^sftp .+"));
             if(res >=0)
             {
                 m_settings->beginGroup("SFTP");
@@ -326,20 +307,16 @@ void MainWindow::saveSettings()
     m_settings->endGroup();
 }
 
-void MainWindow::recive_command(const QStringList & command)
+void MainWindow::receive_command(const QStringList & command)
 {
-    Device* dev;
-    auto pos = ui->tableView->currentIndex().row();
-    int index=0;
     QStringList list = command;
-    QStringList path;
 
-    dev = m_model->getDevice(pos);
-    index = list.indexOf(QRegExp("^sftp .+"));
+    Device* dev = m_model->getDevice(ui->tableView->currentIndex().row());
+    auto pos = list.indexOf(QRegExp("^sftp .+"));
 
-    if(index >= 0)
+    if(pos >= 0)
     {
-        path = list.at(index).split(' ');
+        QStringList path = list.at(pos).split(' ');
         dev->set_sftp_local_path(path.at(1));
         dev->set_sftp_remote_path(path.at(2));
     }
@@ -349,10 +326,10 @@ void MainWindow::recive_command(const QStringList & command)
 void MainWindow::polling()
 {
     Device* dev;
-
     if (m_model->rowCount() == 0)
         return;
-    for(int i=0;i<m_model->rowCount();i++)
+
+    for(int i= 0; i<m_model->rowCount(); i++)
     {
         dev = m_model->getDevice(i);
         emit ask_status(dev->get_host(), dev);

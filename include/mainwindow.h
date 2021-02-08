@@ -36,20 +36,18 @@ private:
     QThread* m_thread;
     DeviceIcmp* m_deviceIcmp;
     QTimer* m_timerStatus;
-    QMutex m_mutex;
     QSettings* m_settings;
     DeviceIcmp* getIcmpHandler();
 
     void startPatching(); //возвращать кол-во пропатченных устройств
 
-protected:
-    void changeEvent(QEvent* event) override;
 public:
     void createRow(Device* dev);
-    MainWindow(QWidget *parent = nullptr);
+    explicit  MainWindow(QWidget *parent = nullptr);
     virtual ~MainWindow();
 
-
+protected:
+    void changeEvent(QEvent* event) override;
 
 private slots:
     void on_actionRussian_triggered();
@@ -76,10 +74,9 @@ private slots:
 
     void saveSettings();
 
-        void recive_command(const QStringList&);
-        void polling();
+    void receive_command(const QStringList&);
 
-
+    void polling();
 signals:
 
         void get_command(const QStringList&);
