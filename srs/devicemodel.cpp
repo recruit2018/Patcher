@@ -1,29 +1,24 @@
 #include "devicemodel.h"
 
-
-
 DeviceModel::DeviceModel(QObject * parent)
     :QAbstractTableModel(parent)
 {
-
 }
 
-int DeviceModel::rowCount(const QModelIndex& parent) const
+int DeviceModel::rowCount(const QModelIndex&) const
 {
-    Q_UNUSED(parent);
     return m_device_list.count();
 }
 
-int DeviceModel::columnCount(const QModelIndex& parent) const
+int DeviceModel::columnCount(const QModelIndex&) const
 {
-    Q_UNUSED(parent);
     return 9;
 }
 
 QVariant DeviceModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid() ||
-    index.row() < 0 || index.row() >= m_device_list.count() ||
+    if (!index.isValid() || index.row() < 0 ||
+    index.row() >= m_device_list.count() ||
     index.column() < 0 || index.column() >= 9)
     return QVariant();
 
@@ -31,19 +26,26 @@ QVariant DeviceModel::data(const QModelIndex& index, int role) const
         return int(Qt::AlignLeft | Qt::AlignVCenter);
 
     if(role == Qt::DisplayRole || role == Qt::EditRole)
-    {
-        Device* dev;
-        dev = m_device_list.at(index.row());
+    {        
+        Device* dev = m_device_list.at(index.row());
         switch (index.column())
         {
-        case Address: {return dev->get_host(); break;}
-        case User: {return dev->get_user();  break;}
-        case DeviceName: {return dev->get_device_name(); break;}
-        case Port: {return QString::number(dev->get_port()); break;}
-        case Status: {return dev->get_status(); break;}
-        case Stage: {return dev->get_stage(); break;}
-        //default: Q_ASSERT(false); !!!!!!!
+        case Address: {return dev->m_addr; break;}
+        case User: {return dev->m_user;  break;}
+        case DeviceName: {return dev->m_device_name; break;}
+        case Port: {return QString::number(dev->m_port); break;}
+        case Status: {return dev->m_onlineStatus; break;}
+        case Stage: {return dev->m_stage; break;}
+        case Password: {return dev->m_pass; break;}
+        case butCRTSettings: { return QVariant(); break;}
+        case butSVSettings: { return QVariant(); break;}
+        default: Q_ASSERT(false);
         }        
+    }
+    if(role == Qt::TextColorRole && index.column() == Status)
+    {
+        return index.data().toString() == "online" ?
+                    QColor(Qt::green) : QColor(Qt::red);
     }
     else
         return QVariant();
@@ -57,16 +59,16 @@ bool DeviceModel::setData(const QModelIndex& index, const QVariant& value, int r
     index.column() < 0 || index.column() >= 9)
     return false;
 
-        Device* dev;
-        dev = m_device_list.at(index.row());
+        Device* dev = m_device_list.at(index.row());
         switch (index.column())
         {
-        case Address: {dev->set_addr(value.toString()); break;}
-        case User: {dev->set_user(value.toString());  break;}
-        case DeviceName: {dev->set_device_name(value.toString()); break;}
-        case Port: {dev->set_port(value.toUInt()); break;}
-        case Status: {dev->set_status(value.toString()); break;}
-        case Stage: {dev->set_stage(value.toString()); break;}
+        case Address: {dev->m_addr = value.toString(); break;}
+        case User: {dev->m_user = value.toString();  break;}
+        case DeviceName: {dev->m_device_name = value.toString(); break;}
+        case Port: {dev->m_port = value.toUInt(); break;}
+        case Status: {dev->m_onlineStatus = value.toString(); break;}
+        case Stage: {dev->m_stage = value.toString(); break;}
+        case Password: {dev->m_pass = value.toString(); break;}
         default: Q_ASSERT(false);
         };
 
@@ -77,6 +79,9 @@ bool DeviceModel::setData(const QModelIndex& index, const QVariant& value, int r
 
 Qt::ItemFlags DeviceModel::flags(const QModelIndex& index) const
 {
+//    if (index.column() == Columns::Status || Columns::Stage)
+//        return QAbstractItemModel::flags(index);
+
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
     flags |= Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 

@@ -13,12 +13,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_thread = new QThread(this);
     m_timerStatus = new QTimer(this);
-
     m_deviceIcmp = getIcmpHandler();
 
-    connect(m_timerStatus,&QTimer::timeout,this,&MainWindow::polling);
-    connect(this,&MainWindow::ask_status, m_deviceIcmp, &DeviceIcmp::getStatus);
-    connect(m_deviceIcmp,SIGNAL(send_status(bool, Device*)), this, SLOT(setStatus(bool, Device*)));
+    createConnections();
 
     m_deviceIcmp->moveToThread(m_thread);
     m_timerStatus->start(2000);
@@ -31,7 +28,6 @@ MainWindow::~MainWindow()
 {
     m_thread->quit();
     m_thread->wait();
-
     delete ui;
 }
 
@@ -50,7 +46,7 @@ void MainWindow::create_device_settings()
 
     if(dev != nullptr)
     {
-        emit get_command(dev->get_command_list());
+        emit get_command(dev->m_shellcommand);
     }
 }
 
@@ -120,9 +116,15 @@ void MainWindow::startPatching()
 
 }
 
+void MainWindow::createConnections()
+{
+    connect(m_timerStatus,&QTimer::timeout,this,&MainWindow::polling);
+    connect(this,&MainWindow::ask_status, m_deviceIcmp, &DeviceIcmp::getStatus);
+    connect(m_deviceIcmp,SIGNAL(send_status(bool, Device*)), this, SLOT(setStatus(bool, Device*)));
+}
+
 void MainWindow::changeEvent(QEvent* event)
 {
-
     if(event->type() == QEvent::LanguageChange)
         ui->retranslateUi(this);
     else
@@ -166,7 +168,6 @@ void MainWindow::on_actionLoad_settings_triggered()
                                    QMessageBox::Ok | QMessageBox::Cancel);
     if(ret == QMessageBox::Ok)
     {
-
         loadSettings();
     }
     else
@@ -227,7 +228,6 @@ void MainWindow::setStatus(bool val, Device* dev)
             m_model->setData(index,"offline",Qt::EditRole);
         }
     }
-
 }
 
 void MainWindow::loadSettings()
@@ -242,10 +242,10 @@ void MainWindow::loadSettings()
         device = new Device(this);
         m_settings->beginGroup(childlist.at(i));
 
-        device->set_addr(m_settings->value("Address").toString());
-        device->set_user(m_settings->value("User").toString());
-        device->set_device_name(m_settings->value("Device").toString());
-        device->set_port(m_settings->value("Port").toUInt());
+        device->m_addr = m_settings->value("Address").toString();
+        device->m_user = m_settings->value("User").toString();
+        device->m_device_name = m_settings->value("Device").toString();
+        device->m_port = m_settings->value("Port").toUInt();
 
         m_settings->beginGroup("COMMAND");
         QStringList child = m_settings->childKeys();
@@ -255,8 +255,8 @@ void MainWindow::loadSettings()
             if(m_settings->value(QString("command%1").arg(j)).toString().indexOf(QRegExp("^sftp .+")))
             {
                 m_settings->beginGroup("SFTP");
-                device->set_sftp_local_path(m_settings->value("LOCALPATH").toString());
-                device->set_sftp_remote_path(m_settings->value("REMOTEPATH").toString());
+                device->m_localfilepath = m_settings->value("LOCALPATH").toString();
+                device->m_remotefilepath = m_settings->value("REMOTEPATH").toString();
                 m_settings->endGroup();
             }
             device->add_command(m_settings->value(QString("command%1").arg(j)).toString());
@@ -280,22 +280,22 @@ void MainWindow::saveSettings()
     for(int i =0;i<m_model->rowCount();i++)
     {
         dev = m_model->getDevice(i);
-        m_settings->beginGroup(QString(dev->get_device_name())+QString::number(i));
-        m_settings->setValue("Address",dev->get_host());
-        m_settings->setValue("User",dev->get_user());
-        m_settings->setValue("Device",dev->get_device_name());
-        m_settings->setValue("Port",dev->get_port());
+        m_settings->beginGroup(QString(dev->m_device_name)+QString::number(i)); //Allows use of the same hostname
+        m_settings->setValue("Address", dev->m_addr);
+        m_settings->setValue("User", dev->m_user);
+        m_settings->setValue("Device", dev->m_device_name);
+        m_settings->setValue("Port", dev->m_port);
         m_settings->beginGroup("COMMAND");
 
-        list = dev->get_command_list();
+        list = dev->m_shellcommand;
         for(int j=0; j<list.size();j++)
         {
             auto res = list.at(j).indexOf(QRegExp("^sftp .+"));
             if(res >=0)
             {
                 m_settings->beginGroup("SFTP");
-                m_settings->setValue("LOCALPATH",dev->get_sftp_local_path());
-                m_settings->setValue("REMOTEPATH",dev->get_sftp_remote_path());
+                m_settings->setValue("LOCALPATH",dev->m_localfilepath);
+                m_settings->setValue("REMOTEPATH",dev->m_remotefilepath);
                 m_settings->endGroup();
             }
             m_settings->setValue(QString("command%1").arg(j),list.at(j));
@@ -317,10 +317,10 @@ void MainWindow::receive_command(const QStringList & command)
     if(pos >= 0)
     {
         QStringList path = list.at(pos).split(' ');
-        dev->set_sftp_local_path(path.at(1));
-        dev->set_sftp_remote_path(path.at(2));
+        dev->m_localfilepath = path.at(1);
+        dev->m_remotefilepath = path.at(2);
     }
-    dev->set_command_list(list);
+    dev->m_shellcommand = list;
 }
 
 void MainWindow::polling()
@@ -332,7 +332,7 @@ void MainWindow::polling()
     for(int i= 0; i<m_model->rowCount(); i++)
     {
         dev = m_model->getDevice(i);
-        emit ask_status(dev->get_host(), dev);
+        emit ask_status(dev->m_addr, dev);
     }
 }
 

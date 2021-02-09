@@ -40,6 +40,7 @@ private:
     DeviceIcmp* getIcmpHandler();
 
     void startPatching(); //возвращать кол-во пропатченных устройств
+    void createConnections();
 
 public:
     void createRow(Device* dev);
