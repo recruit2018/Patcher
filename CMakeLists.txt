@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(Patcher VERSION 0.2.4 LANGUAGES CXX)
+project(Patcher VERSION 0.3 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)

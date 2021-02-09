@@ -79,9 +79,6 @@ bool DeviceModel::setData(const QModelIndex& index, const QVariant& value, int r
 
 Qt::ItemFlags DeviceModel::flags(const QModelIndex& index) const
 {
-//    if (index.column() == Columns::Status || Columns::Stage)
-//        return QAbstractItemModel::flags(index);
-
     Qt::ItemFlags flags = QAbstractItemModel::flags(index);
     flags |= Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
