@@ -13,10 +13,6 @@
 #include "commandwind.h"
 #include "devicemodel.h"
 #include "devicedelegate.h"
-#include "sshclient.h"
-#include "sshprocess.h"
-#include "sshsftp.h"
-#include "sshsftpcommandsend.h"
 #include "devicedelegate.h"
 
 QT_BEGIN_NAMESPACE
