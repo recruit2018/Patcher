@@ -10,7 +10,6 @@ DeviceIcmpUnix::DeviceIcmpUnix(QObject *parent) : DeviceIcmp(parent)
 {
 }
 
-
 struct addrinfo* DeviceIcmpUnix::host_serv(const char *host, const char *serv, int family, int socktype)
 {
     int				n;
@@ -26,8 +25,6 @@ struct addrinfo* DeviceIcmpUnix::host_serv(const char *host, const char *serv, i
 
     return(res);	/* return pointer to first on linked list */
 }
-
-
 
 unsigned short DeviceIcmpUnix::in_cksum(unsigned short *addr, int len)
 {
@@ -51,8 +48,6 @@ unsigned short DeviceIcmpUnix::in_cksum(unsigned short *addr, int len)
     answer = ~sum;
     return(answer);
 }
-
-
 
 void DeviceIcmpUnix::readloop(Device* dev)
 {
@@ -110,9 +105,6 @@ void DeviceIcmpUnix::readloop(Device* dev)
     }
 }
 
-
-
-
 void DeviceIcmpUnix::send_v4()
 {
     int			len;
@@ -132,9 +124,6 @@ void DeviceIcmpUnix::send_v4()
     sendto(m_sockfd, m_sendbuf, len, 0, m_sasend, m_salen);
 }
 
-
-
-
 void DeviceIcmpUnix::getStatus(const QString & host, Device* dev)
 {
     m_pid = getpid();
@@ -149,8 +138,6 @@ void DeviceIcmpUnix::getStatus(const QString & host, Device* dev)
     freeaddrinfo(m_ai);
     close(m_sockfd);
 }
-
-
 
 bool DeviceIcmpUnix::proc_v4(char *ptr, ssize_t len)
 {
@@ -198,7 +185,6 @@ DeviceIcmpWin::~DeviceIcmpWin()
 {
     IcmpCloseHandle(hIcmpFile);
 }
-
 
 void DeviceIcmpWin::getStatus(const QString& str, Device* dev)
 {    
