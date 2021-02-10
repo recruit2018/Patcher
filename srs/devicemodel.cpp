@@ -12,14 +12,14 @@ int DeviceModel::rowCount(const QModelIndex&) const
 
 int DeviceModel::columnCount(const QModelIndex&) const
 {
-    return 9;
+    return maxColumnCount;
 }
 
 QVariant DeviceModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid() || index.row() < 0 ||
     index.row() >= m_device_list.count() ||
-    index.column() < 0 || index.column() >= 9)
+    index.column() < 0 || index.column() >= maxColumnCount)
     return QVariant();
 
     if(role == Qt::TextAlignmentRole)
@@ -56,7 +56,7 @@ bool DeviceModel::setData(const QModelIndex& index, const QVariant& value, int r
 {
     if (!index.isValid() || role != Qt::EditRole ||
     index.row() < 0 || index.row() >= m_device_list.count() ||
-    index.column() < 0 || index.column() >= 9)
+    index.column() < 0 || index.column() >= maxColumnCount)
     return false;
 
         Device* dev = m_device_list.at(index.row());

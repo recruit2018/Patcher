@@ -86,14 +86,16 @@ class DeviceIcmpWin : public DeviceIcmp
     Q_OBJECT
 public:
     DeviceIcmpWin(QObject* = nullptr);
+    ~DeviceIcmpWin();
+private:
+    enum {BUFSIZE= 32};
     HANDLE hIcmpFile;
     unsigned long ipaddr = INADDR_NONE;
     DWORD dwRetVal = 0;
-    char SendData[32];
+    char SendData[BUFSIZE];
     LPVOID ReplyBuffer = NULL;
     DWORD ReplySize = 0;
     QStringList m_addresses;
-    ~DeviceIcmpWin();
 
 public slots:
     void getStatus(const QString&, Device*) override;

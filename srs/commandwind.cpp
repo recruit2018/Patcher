@@ -16,13 +16,10 @@ void CommandWind::addRow(const QString& str)
     ui->listWidget->addItem(newItem);
 }
 
-
 CommandWind::~CommandWind()
 {
     delete ui;
 }
-
-
 
 void CommandWind::data_recived(const QStringList &command)
 {
@@ -32,14 +29,10 @@ void CommandWind::data_recived(const QStringList &command)
    }
 }
 
-
-
 void CommandWind::on_pushButton_2_clicked()
 {
     delete ui->listWidget->takeItem(ui->listWidget->currentRow());
 }
-
-
 
 void CommandWind::on_pushButton_3_clicked()
 {
@@ -53,7 +46,6 @@ void CommandWind::on_pushButton_3_clicked()
     commands.removeAll({});
     emit send_command(commands);
     close();
-
 }
 
 void CommandWind::on_pushButton_4_clicked()

@@ -20,6 +20,7 @@ class DeviceModel : public QAbstractTableModel
     Q_OBJECT
 private:
     QList<Device*> m_device_list;
+    enum {maxColumnCount= 9};
 public:        
     enum Columns
     {
