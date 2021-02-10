@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_thread = new QThread(this);
     m_timerStatus = new QTimer(this);
     m_deviceIcmp = getIcmpHandler();
-
     createConnections();
 
     m_deviceIcmp->moveToThread(m_thread);
@@ -22,6 +21,13 @@ MainWindow::MainWindow(QWidget *parent)
     m_thread->start();
 
     setWindowTitle(tr("Patcher"));
+}
+
+void MainWindow::createConnections()
+{
+    connect(m_timerStatus,&QTimer::timeout,this,&MainWindow::polling);
+    connect(this,&MainWindow::ask_status, m_deviceIcmp, &DeviceIcmp::getStatus);
+    connect(m_deviceIcmp,SIGNAL(send_status(bool, Device*)), this, SLOT(setStatus(bool, Device*)));
 }
 
 MainWindow::~MainWindow()
@@ -33,7 +39,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::create_device_settings()
 {
-    Device* dev;
     CommandWind* wind = new CommandWind(this);
 
     wind->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -42,14 +47,13 @@ void MainWindow::create_device_settings()
     wind->show();
 
     auto pos = ui->tableView->currentIndex().row();
-    dev =  m_model->getDevice(pos);
+    Device* dev =  m_model->getDevice(pos);
 
     if(dev != nullptr)
     {
         emit get_command(dev->m_shellcommand);
     }
 }
-
 
 void MainWindow::on_But_start_pach_clicked()
 {
@@ -65,7 +69,6 @@ void MainWindow::on_But_start_pach_clicked()
 }
 
 
-
 void MainWindow::save_setting_device()
 {
 }
@@ -77,7 +80,6 @@ void MainWindow::on_But_add_device_clicked()
     QPushButton* but_save_set = new QPushButton("Save settings",this);
     QPushButton* but_create_set = new QPushButton("Create settings",this);
     but_save_set->setEnabled(false);
-
     connect(but_create_set, &QPushButton::clicked, this, &MainWindow::create_device_settings);
 
     ui->tableView->setIndexWidget(m_model->index(m_model->rowCount() -1, DeviceModel::Columns::butCRTSettings), but_create_set);
@@ -113,14 +115,53 @@ DeviceIcmp *MainWindow::getIcmpHandler()
 
 void MainWindow::startPatching()
 {
+    QByteArrayList MyByteList;
+    MyByteList.append("password");
 
-}
+    for(int i= 0; i < m_model->rowCount(); i++)
+    {
+        Device* dev = m_model->getDevice(i);
+        m_client.setPassphrase(dev->m_pass);
 
-void MainWindow::createConnections()
-{
-    connect(m_timerStatus,&QTimer::timeout,this,&MainWindow::polling);
-    connect(this,&MainWindow::ask_status, m_deviceIcmp, &DeviceIcmp::getStatus);
-    connect(m_deviceIcmp,SIGNAL(send_status(bool, Device*)), this, SLOT(setStatus(bool, Device*)));
+        QEventLoop waitssh;
+        QObject::connect(&m_client, &SshClient::sshReady, &waitssh, &QEventLoop::quit);
+        QObject::connect(&m_client, &SshClient::sshError, &waitssh, &QEventLoop::quit);
+        m_client.connectToHost(dev->m_user, dev->m_addr, dev->m_port, MyByteList);
+        waitssh.exec();
+
+        if(m_client.sshState() != SshClient::SshState::Ready)
+        {
+            qDebug() << "Can't connect to connexion server";
+        }else
+            qDebug()  << "SSH connected";
+
+        QStringList command = dev->m_shellcommand;
+        for(int j= 0; j < command.count();j++)
+        {
+            m_proc = m_client.getChannel<SshProcess>(QString("command%1").arg(j));
+            auto index = m_model->index(i, DeviceModel::Columns::Stage, QModelIndex());
+            m_model->setData(index,QStringLiteral("Exec: command %1").arg(j),Qt::EditRole);
+
+            if((command.at(j).indexOf(QRegExp("^sftp .+"))) >= 0)
+            {
+                m_sftp = m_client.getChannel<SshSFtp>("ftp");
+                SshSftpCommandSend* cmd = new SshSftpCommandSend(dev->m_localfilepath,dev->m_remotefilepath,*m_sftp); //The parent is SshSFtp
+                m_sftp->processCmd(cmd);
+                continue;
+            }
+
+            QEventLoop waitproc;
+            QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
+            QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
+            m_proc->runCommand(command.at(j));
+            waitproc.exec();
+        }
+        QEventLoop waitcli;
+        m_client.disconnectFromHost();
+        QObject::connect(&m_client, &SshClient::sshDisconnected, &waitcli, &QEventLoop::quit);
+        QObject::connect(&m_client, &SshClient::sshError, &waitcli, &QEventLoop::quit);
+        waitcli.exec();
+    }
 }
 
 void MainWindow::changeEvent(QEvent* event)
@@ -137,9 +178,7 @@ void MainWindow::createRow(Device* dev)
     QPushButton * but_save_set = new QPushButton("Save settings",this);
     QPushButton * but_create_set = new QPushButton("Create settings",this);
     but_save_set->setEnabled(false);
-    //   connect(but_save_set,SIGNAL(clicked()),this, SLOT(save_device_settings()));
     connect(but_create_set,SIGNAL(clicked()),this, SLOT(create_device_settings()));
-
 
     ui->tableView->setIndexWidget(m_model->index(m_model->rowCount()-1, DeviceModel::Columns::butCRTSettings),but_create_set);
     ui->tableView->setIndexWidget(m_model->index(m_model->rowCount()-1, DeviceModel::Columns::butSVSettings),but_save_set);
@@ -163,9 +202,9 @@ void MainWindow::on_actionEnglish_triggered()
 void MainWindow::on_actionLoad_settings_triggered()
 {
     auto ret = QMessageBox::warning(this, tr("Patcher"),
-                                   tr("When downloading, all unsaved data will be lost.\n"
-                                      "Do you really want to continue?"),
-                                   QMessageBox::Ok | QMessageBox::Cancel);
+                                    tr("When downloading, all unsaved data will be lost.\n"
+                                       "Do you really want to continue?"),
+                                    QMessageBox::Ok | QMessageBox::Cancel);
     if(ret == QMessageBox::Ok)
     {
         loadSettings();
@@ -183,9 +222,9 @@ void MainWindow::on_actionLoad_settings_triggered()
 void MainWindow::on_actionSave_sattings_triggered()
 {
     auto ret = QMessageBox::warning(this, tr("Patcher"),
-                                   tr("When saving, the previous settings will be permanently changed.\n"
-                                      "Do you really want to continue?"),
-                                   QMessageBox::Ok | QMessageBox::Cancel);
+                                    tr("When saving, the previous settings will be permanently changed.\n"
+                                       "Do you really want to continue?"),
+                                    QMessageBox::Ok | QMessageBox::Cancel);
     if(ret == QMessageBox::Ok)
     {
         saveSettings();
@@ -196,7 +235,7 @@ void MainWindow::on_actionSave_sattings_triggered()
 
 void MainWindow::on_but_del_device_clicked()
 {
-    if(!ui->tableView->currentIndex().isValid())    
+    if(!ui->tableView->currentIndex().isValid())
         return;
 
     const bool wasBlocked = m_deviceIcmp->blockSignals(true); //Allows to discard the mutex
@@ -232,14 +271,13 @@ void MainWindow::setStatus(bool val, Device* dev)
 
 void MainWindow::loadSettings()
 {   
-    Device* device;
     m_model->removeRows(0, m_model->rowCount());
     m_settings->beginGroup("Devices");
-    QStringList childlist = m_settings->childGroups();
 
+    QStringList childlist = m_settings->childGroups();
     for(int i = 0;i < childlist.size();i++)
     {
-        device = new Device(this);
+        Device* device = new Device(this);
         m_settings->beginGroup(childlist.at(i));
 
         device->m_addr = m_settings->value("Address").toString();
@@ -266,20 +304,17 @@ void MainWindow::loadSettings()
         createRow(device);
         device->printself();
     }
-
     m_settings->endGroup();
 }
 
 void MainWindow::saveSettings()
 {
-    Device* dev;
-    QStringList list;
-
     m_settings->clear();
     m_settings->beginGroup("Devices");
+
     for(int i =0;i<m_model->rowCount();i++)
     {
-        dev = m_model->getDevice(i);
+        Device* dev = m_model->getDevice(i);
         m_settings->beginGroup(QString(dev->m_device_name)+QString::number(i)); //Allows use of the same hostname
         m_settings->setValue("Address", dev->m_addr);
         m_settings->setValue("User", dev->m_user);
@@ -287,7 +322,7 @@ void MainWindow::saveSettings()
         m_settings->setValue("Port", dev->m_port);
         m_settings->beginGroup("COMMAND");
 
-        list = dev->m_shellcommand;
+        QStringList list = dev->m_shellcommand;
         for(int j=0; j<list.size();j++)
         {
             auto res = list.at(j).indexOf(QRegExp("^sftp .+"));
@@ -307,10 +342,9 @@ void MainWindow::saveSettings()
     m_settings->endGroup();
 }
 
-void MainWindow::receive_command(const QStringList & command)
+void MainWindow::receive_command(const QStringList& command)
 {
     QStringList list = command;
-
     Device* dev = m_model->getDevice(ui->tableView->currentIndex().row());
     auto pos = list.indexOf(QRegExp("^sftp .+"));
 
@@ -325,13 +359,12 @@ void MainWindow::receive_command(const QStringList & command)
 
 void MainWindow::polling()
 {
-    Device* dev;
     if (m_model->rowCount() == 0)
         return;
 
     for(int i= 0; i<m_model->rowCount(); i++)
     {
-        dev = m_model->getDevice(i);
+        Device* dev = m_model->getDevice(i);
         emit ask_status(dev->m_addr, dev);
     }
 }
