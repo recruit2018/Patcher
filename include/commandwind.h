@@ -17,9 +17,11 @@ public:
     explicit CommandWind(QWidget *parent = nullptr);
     ~CommandWind();
 
-private slots:
+public slots:
 
-    void data_recived(const QStringList&);
+void data_recived(const QStringList&);
+
+private slots:
 
     void on_pushButton_clicked();
 

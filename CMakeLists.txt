@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(Patcher VERSION 0.2.4 LANGUAGES CXX)
+project(Patcher VERSION 0.3 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 14)
@@ -10,11 +10,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-
-option(SPECIAL_TASKS "Activates for special tasks" OFF)
-if(SPECIAL_TASKS)
-    add_definitions(-DTASKS)
-endif()
 
 option(DEBUG_INFO "Display debug info" ON)
 if(DEBUG_INFO)
@@ -29,13 +24,15 @@ set(UI_FILE ${SOURSE_DIR}/mainwindow.ui ${SOURSE_DIR}/commandwind.ui)
 
 set(HEADERS ${HEADERS_DIR}/sshclient.h ${HEADERS_DIR}/sshchannel.h ${HEADERS_DIR}/sshkey.h ${HEADERS_DIR}/sshprocess.h
     ${HEADERS_DIR}/sshsftp.h ${HEADERS_DIR}/sshsftpcommandsend.h ${HEADERS_DIR}/sshsftpcommand.h
-    ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/commandtable.h ${HEADERS_DIR}/mainwindow.h
-    ${HEADERS_DIR}/device.h ${HEADERS_DIR}/commandwind.h ${HEADERS_DIR}/deviceicmp.h)
+    ${HEADERS_DIR}/patcherfunc.h ${HEADERS_DIR}/mainwindow.h
+    ${HEADERS_DIR}/device.h ${HEADERS_DIR}/commandwind.h ${HEADERS_DIR}/deviceicmp.h ${HEADERS_DIR}/devicemodel.h
+    ${HEADERS_DIR}/devicedelegate.h ${HEADERS_DIR}/devicefiltermodel.h)
 
 set(SOURCES ${SOURSE_DIR}/main.cpp ${SOURSE_DIR}/sshclient.cpp ${SOURSE_DIR}/sshchannel.cpp ${SOURSE_DIR}/sshkey.cpp ${SOURSE_DIR}/sshprocess.cpp
     ${SOURSE_DIR}/sshsftp.cpp ${SOURSE_DIR}/sshsftpcommandsend.cpp ${SOURSE_DIR}/sshsftpcommand.cpp
-    ${SOURSE_DIR}/patcherfunc.cpp ${SOURSE_DIR}/commandtable.cpp ${SOURSE_DIR}/mainwindow.cpp
-    ${SOURSE_DIR}/device.cpp ${SOURSE_DIR}/commandwind.cpp ${SOURSE_DIR}/deviceicmp.cpp)
+    ${SOURSE_DIR}/patcherfunc.cpp ${SOURSE_DIR}/mainwindow.cpp
+    ${SOURSE_DIR}/device.cpp ${SOURSE_DIR}/commandwind.cpp ${SOURSE_DIR}/deviceicmp.cpp ${SOURSE_DIR}/devicemodel.cpp
+    ${SOURSE_DIR}/devicedelegate.cpp ${SOURSE_DIR}/devicefiltermodel.cpp)
 
 find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)

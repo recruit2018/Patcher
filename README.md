@@ -1,4 +1,6 @@
 # Patcher
+Support system: Windows/Linux
+Tested on: Linux Ubuntu 20.04 64 bit, Windows 7 64 bit
 
 ### To successfully launch the project, you must complete the following steps:
 ```sh
@@ -18,6 +20,4 @@ $ cmake .. -DBUILD_SHARED_LIBS=ON -DCRYPTO_BACKEND=" your crypto lib "
 $ cmake --build .
 ```
 
-### Support system: Windows/Linux
 
-### Tested on: Linux Ubuntu 20.04 64 bit, Windows 7 64 bit
