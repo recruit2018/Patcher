@@ -99,8 +99,6 @@ void MainWindow::on_actionRussian_triggered()
     qApp->installTranslator(&m_tranclator);
 }
 
-
-
 DeviceIcmp *MainWindow::getIcmpHandler()
 {
     //The parent is not passed because in the future the object will be moved to the thread class

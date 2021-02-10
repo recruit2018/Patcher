@@ -53,7 +53,6 @@ QStringList jspursing(const QString& filepath)
 void printlist(const QStringList& list)
 {
     for(auto i: list) qDebug()<<i;
-
 }
 
 

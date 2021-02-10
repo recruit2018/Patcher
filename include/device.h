@@ -1,7 +1,6 @@
 # pragma once
 
 #include <QObject>
-#include <QStringList>
 #include <QtDebug>
 #include "patcherfunc.h"
 
