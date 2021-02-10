@@ -19,8 +19,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_deviceIcmp->moveToThread(m_thread);
     m_timerStatus->start(2000);
     m_thread->start();
-
-    setWindowTitle(tr("Patcher"));
 }
 
 void MainWindow::createConnections()
@@ -98,8 +96,6 @@ void MainWindow::on_actionRussian_triggered()
     m_tranclator.load("patcher_ru_RU",".");
     qApp->installTranslator(&m_tranclator);
 }
-
-
 
 DeviceIcmp *MainWindow::getIcmpHandler()
 {

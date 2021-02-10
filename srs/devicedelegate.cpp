@@ -26,7 +26,6 @@ void DeviceDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option
 
     if(index.column() == 5)
     {
-
         if(index.data().toString() == "online")
         {
             s.palette.setColor(QPalette::HighlightedText, QColor(Qt::green));
@@ -35,9 +34,6 @@ void DeviceDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option
         {
             s.palette.setColor(QPalette::HighlightedText, QColor(Qt::red));
         }
-
     }
-
     QStyledItemDelegate::paint(painter, s, index);
-
 }
