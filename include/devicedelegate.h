@@ -1,12 +1,10 @@
-#ifndef DEVICEDELEGATE_H
-#define DEVICEDELEGATE_H
+# pragma once
 
 #include <QStyledItemDelegate>
 #include <QObject>
 #include <QPushButton>
 #include <QString>
 #include <QPainter>
-
 
 class DeviceDelegate : public QStyledItemDelegate
 {
@@ -19,4 +17,3 @@ public:
     void paint(QPainter* painter,const QStyleOptionViewItem& option,const QModelIndex& index) const;
 };
 
-#endif // DEVICEDELEGATE_H

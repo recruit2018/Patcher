@@ -19,8 +19,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_deviceIcmp->moveToThread(m_thread);
     m_timerStatus->start(2000);
     m_thread->start();
-
-    setWindowTitle(tr("Patcher"));
 }
 
 void MainWindow::createConnections()

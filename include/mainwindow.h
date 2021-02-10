@@ -37,7 +37,7 @@ private:
     QSettings* m_settings;
     DeviceIcmp* getIcmpHandler();
 
-    void startPatching(); //возвращать кол-во пропатченных устройств
+    void startPatching();
     void createConnections();
 public:
     void createRow(Device* dev);
@@ -62,6 +62,7 @@ private slots:
     void saveSettings();
     void receive_command(const QStringList&);
     void polling();
+
 signals:
     void get_command(const QStringList&);
     void ask_status(const QString&,Device*);
