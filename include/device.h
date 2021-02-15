@@ -8,7 +8,9 @@ class Device : public QObject
 {
     Q_OBJECT
 public:
-    explicit Device(QObject *parent = nullptr);
+    explicit Device(QObject *parent = nullptr);    
+    Device (const Device&) = delete;
+    Device& operator=(const Device&) = delete;
 
     QString m_user{"ivan"};
     QString m_device_name{"localhost"};
@@ -20,9 +22,7 @@ public:
     QString m_onlineStatus{"unknown"};
     QString m_stage{"wait for start"};
     QString m_pass;
-
     inline void add_command(const QString& command) { m_shellcommand.append(command); }
     void printself() const; //temp func for debug
-
 };
 

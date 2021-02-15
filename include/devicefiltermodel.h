@@ -9,7 +9,7 @@ public:
    explicit DeviceFilterModel(QObject *parent=0);
 
 protected:
-bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
 };
 
