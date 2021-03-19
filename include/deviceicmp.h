@@ -33,7 +33,7 @@ class DeviceIcmp : public QObject
     Q_OBJECT
 public:
     explicit DeviceIcmp(QObject *parent = nullptr);
-    virtual ~DeviceIcmp();
+    virtual ~DeviceIcmp(){};
 public slots:
     virtual void getStatus(const QString&, Device*) = 0;
 };

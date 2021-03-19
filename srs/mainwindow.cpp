@@ -145,7 +145,16 @@ void MainWindow::startPatching()
                 m_sftp->processCmd(cmd);
                 continue;
             }
-
+            if((command.at(j).indexOf(QRegExp("^scp .+"))) >= 0)
+            {
+                m_scp = m_client.getChannel<SshScpSend>("scp");
+                QEventLoop waitscp;
+                QObject::connect(m_scp, &SshScpSend::finished, &waitscp, &QEventLoop::quit);
+                QObject::connect(m_scp, &SshScpSend::failed, &waitscp, &QEventLoop::quit);
+                m_scp->send("./newpatch.tar.gz", "/home/ivan/Remotemachine2/newpatch.tar.gz");
+                waitscp.exec();
+                continue;
+            }
             QEventLoop waitproc;
             QObject::connect(m_proc, &SshProcess::finished, &waitproc, &QEventLoop::quit);
             QObject::connect(m_proc, &SshProcess::failed, &waitproc, &QEventLoop::quit);
@@ -157,6 +166,7 @@ void MainWindow::startPatching()
         QObject::connect(&m_client, &SshClient::sshDisconnected, &waitcli, &QEventLoop::quit);
         QObject::connect(&m_client, &SshClient::sshError, &waitcli, &QEventLoop::quit);
         waitcli.exec();
+        qDebug()<<"!!!";
     }
 }
 

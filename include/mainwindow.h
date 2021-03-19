@@ -17,6 +17,7 @@
 #include "sshsftp.h"
 #include "sshsftpcommandsend.h"
 #include "devicedelegate.h"
+#include "sshscpsend.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,16 +27,17 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    DeviceModel* m_model;
+    DeviceModel* m_model = nullptr;
     QTranslator m_tranclator;
     SshClient m_client;
-    SshProcess* m_proc;
-    SshSFtp* m_sftp;
-    QThread* m_thread;
-    DeviceIcmp* m_deviceIcmp;
-    QTimer* m_timerStatus;
-    QSettings* m_settings;
+    SshProcess* m_proc = nullptr;
+    SshSFtp* m_sftp = nullptr;
+    QThread* m_thread = nullptr;
+    DeviceIcmp* m_deviceIcmp = nullptr;
+    QTimer* m_timerStatus = nullptr;
+    QSettings* m_settings = nullptr;
     DeviceIcmp* getIcmpHandler();
+    SshScpSend* m_scp = nullptr;
 
     void startPatching();
     void createConnections();
